@@ -95,8 +95,7 @@ void CSVReader::FillMap()
 			double value = 0.0;
 			if (from_string<double>(value, valueString, std::dec)) {
 				m_map[key] = value;
-				//Disabled for now so that doesn't fill up everywhere
-				//printf("RobotConfig:: Reading in Data Key %s Number %.2f %f\n", key.c_str(), value, (*m_map.find(key)).second);
+				printf("RobotConfig:: Reading in Data Key %s Number %.2f %f\n", key.c_str(), value, (*m_map.find(key)).second);
 			} else {
 				//ensure we're always reading the right values
 				assert(0);

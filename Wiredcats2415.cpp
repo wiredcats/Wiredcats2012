@@ -8,7 +8,7 @@ bool Task2415::FirstConstructor = true;
 Global global;
 
 Wiredcats2415::Wiredcats2415(void) {
-	compressor = new Compressor(1,1);	
+	compressor = new Compressor(8,1);	
 }
 
 void Wiredcats2415::Disabled(void) {

@@ -1,39 +1,20 @@
-#ifndef GLOBAL_H_
-#define GLOBAL_H_
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
 #include "WPILib.h"
 #include "CSV/CSVReader.h"
 
-#define GLOBAL_JLEFT_PORT	 (1)
-#define GLOBAL_JRIGHT_PORT	 (2)
-#define GLOBAL_JFAKEA_PORT	 (3)
-#define GLOBAL_JFAKEB_PORT	 (4)
-
-/* Global
- * ======
- * 
- * Variables that will be used across tasks are held here!
- * Global is in itself a task so that it constantly is fed the new values
- * This eliminates the need to constantly be passing copies of objects
- * around, thus quickening code!
- * 
- * Stuff located here:
- * 		- Joysticks
- * 		- Robot Status (disabled, operator, etc)
- * 		- Sensor Values (eventually)
- * 
+/*
+ * Not the same glorified global as before
+ * Now, it just has Joysticks, CSV readers
+ * and other random stuff
  */
 
-class Global {
-private:
-	// the instance
-	static Global *myself;
-	
-	Joystick *xboxController;
-	CSVReader* csvReader;
-
+class Global{	
 public:
-	Global(void);
+	Global();
+	
+	Joystick* GetXboxController();
 
 	//NOTE DO NOT HIT MODE SWITCH. THIS WILL CHANGE LEFT Y INTO DPAD Y	
 	double GetLeftX();
@@ -60,10 +41,10 @@ public:
 	void ResetCSV();
 	
 	double LinearizeVictor(double goal_speed);
-
-	// this is how tasks get access to the variables
-	static Global *GetInstance();
+	
+private:
+	Joystick *xboxController;
+	CSVReader* csvReader;	
 };
 
-#endif
-
+#endif 

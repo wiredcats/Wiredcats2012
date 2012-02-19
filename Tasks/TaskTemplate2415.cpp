@@ -1,7 +1,7 @@
 #include "TaskTemplate2415.h"
 
 TaskTemplate2415::TaskTemplate2415(void) {
-	global = Global::GetInstance();
+	global = new Global();
 
 	Start("template2415");
 }

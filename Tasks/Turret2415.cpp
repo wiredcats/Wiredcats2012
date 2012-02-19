@@ -1,11 +1,20 @@
 #include "Turret2415.h"
 
 Turret2415::Turret2415(void) {
-	global = Global::GetInstance();
-
-	jagTurret = new Jaguar(3);
+	global = new Global();
+	
+	vicWheel = new Victor(3);
+	vicRotate = new Victor(4);
+	
+	fortyFive = new Solenoid(5);
+	sixty = new Solenoid(6);
+	
+	wheelEncoder = new Encoder(1,2,false,0); //0 maps to k1x. Shouldn't have to do this either...
 
 	taskState = WAIT_FOR_INPUT;
+	
+	limitLeft = new DigitalInput(6);
+	limitRight = new DigitalInput(5);
 
 	Start("turret2415");
 }
@@ -14,18 +23,34 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	printf("entering %s main\n", taskName);
 	while (keepTaskAlive) {
 		if (taskStatus == STATUS_AUTO || taskStatus == STATUS_TELEOP) {
+			//printf("Encoder Rate: %g\n", wheelEncoder->GetRate());
 			switch (taskState) {
-				case WAIT_FOR_INPUT:
-					jagTurret->Set(0.0);
+				case WAIT_FOR_INPUT: //TODO: Fix this wheel bug
+					vicRotate->Set(0.0);
+					vicWheel->Set(0.0);
+					fortyFive->Set(true);
+					sixty->Set(false);					
 					break;
 				case MOVE_LEFT:
-					jagTurret->Set(-(global->ReadCSV("TURRET_SPEED")));
+					vicRotate->Set(-(global->ReadCSV("TURRET_SPEED")));
+					if(limitLeft->Get()){
+						printf("Left limit hit\n");
+						taskState = WAIT_FOR_INPUT;
+					}
 					break;
 				case MOVE_RIGHT:
-					jagTurret->Set(global->ReadCSV("TURRET_SPEED"));
+					vicRotate->Set(global->ReadCSV("TURRET_SPEED"));
+					if(limitRight->Get()){
+						printf("Right limit hit\n");
+						taskState = WAIT_FOR_INPUT;
+					}
 					break;
+				case SHOOT:
+					fortyFive->Set(false);
+					sixty->Set(true);
 				default:
-					jagTurret->Set(0.0);
+					vicRotate->Set(0.0);
+					vicWheel->Set(0.0);
 					break;
 			}
 		}

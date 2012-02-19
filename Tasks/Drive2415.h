@@ -19,7 +19,7 @@ class Drive2415 : public Task2415 {
 private:
 	Global *global;
 
-	Jaguar *jagLeft, *jagRight;
+	Victor *vicLeft, *vicRight;
 
 public:
 	Drive2415(void);

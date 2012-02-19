@@ -9,6 +9,7 @@
 #include "../Global.h"
 
 #define WAIT_FOR_INPUT (10)
+#define MANUAL_CONTROL (20)
 
 class AutoTracker2415 : public Task2415 {
 private:
@@ -21,7 +22,8 @@ public:
 	
 	virtual int Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10);
 	ParticleAnalysisReport FindBest(vector<ParticleAnalysisReport>* vec);
-	double Ratio(vector<ParticleAnalysisReport>* vec, int a);
+	double Ratio(ParticleAnalysisReport vec);
+	int BoundingBoxCenterX(ParticleAnalysisReport vec);
 };
 
 #endif

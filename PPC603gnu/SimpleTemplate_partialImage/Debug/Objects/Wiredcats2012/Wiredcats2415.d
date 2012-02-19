@@ -142,7 +142,6 @@ SimpleTemplate_partialImage/Debug/Objects/Wiredcats2012/Wiredcats2415.o:  \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/DigitalIOButton.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/InternalButton.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/JoystickButton.h \
-  C:/windriver/vxworks-6.3/target/h/WPILib/Joystick.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/NetworkButton.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/CANJaguar.h \
@@ -200,6 +199,7 @@ SimpleTemplate_partialImage/Debug/Objects/Wiredcats2012/Wiredcats2415.o:  \
   C:/windriver/vxworks-6.3/target/h/WPILib/DriverStationLCD.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Encoder.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/GearTooth.h \
+  C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Gyro.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/HiTechnicCompass.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/I2C.h \
@@ -327,6 +327,7 @@ SimpleTemplate_partialImage/Debug/Objects/Wiredcats2012/Wiredcats2415.o:  \
   C:/windriver/workspace/Wiredcats2012/Tasks/../Task2415.h \
   C:/windriver/workspace/Wiredcats2012/Tasks/../Global.h \
   C:/windriver/workspace/Wiredcats2012/Tasks/Turret2415.h \
+  C:/windriver/workspace/Wiredcats2012/Tasks/Intake2415.h \
   C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h \
@@ -617,8 +618,6 @@ C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/InternalButton.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/JoystickButton.h:
 
-C:/windriver/vxworks-6.3/target/h/WPILib/Joystick.h:
-
 C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/NetworkButton.h:
@@ -732,6 +731,8 @@ C:/windriver/vxworks-6.3/target/h/WPILib/DriverStationLCD.h:
 C:/windriver/vxworks-6.3/target/h/WPILib/Encoder.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/GearTooth.h:
+
+C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/Gyro.h:
 
@@ -986,6 +987,8 @@ C:/windriver/workspace/Wiredcats2012/Tasks/../Task2415.h:
 C:/windriver/workspace/Wiredcats2012/Tasks/../Global.h:
 
 C:/windriver/workspace/Wiredcats2012/Tasks/Turret2415.h:
+
+C:/windriver/workspace/Wiredcats2012/Tasks/Intake2415.h:
 
 C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h:
 

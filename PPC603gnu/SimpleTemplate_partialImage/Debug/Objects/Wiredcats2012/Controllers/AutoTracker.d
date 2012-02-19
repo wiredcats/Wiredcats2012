@@ -143,7 +143,6 @@
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/DigitalIOButton.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/InternalButton.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/JoystickButton.h \
-  C:/windriver/vxworks-6.3/target/h/WPILib/Joystick.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/NetworkButton.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/CANJaguar.h \
@@ -201,6 +200,7 @@
   C:/windriver/vxworks-6.3/target/h/WPILib/DriverStationLCD.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Encoder.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/GearTooth.h \
+  C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/Gyro.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/HiTechnicCompass.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/I2C.h \
@@ -613,8 +613,6 @@ C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/InternalButton.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/JoystickButton.h:
 
-C:/windriver/vxworks-6.3/target/h/WPILib/Joystick.h:
-
 C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/Buttons/NetworkButton.h:
@@ -728,6 +726,8 @@ C:/windriver/vxworks-6.3/target/h/WPILib/DriverStationLCD.h:
 C:/windriver/vxworks-6.3/target/h/WPILib/Encoder.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/GearTooth.h:
+
+C:/windriver/vxworks-6.3/target/h/WPILib/GenericHID.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/Gyro.h:
 

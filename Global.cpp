@@ -1,22 +1,10 @@
 #include "Global.h"
 
-//TODO Rewrite this with the same enum buttons as CheesyPoofs
-
-Global *Global::myself = 0;
-
-Global::Global(void) {
-	static bool alreadyRun = false;
-	
-	if (!alreadyRun) {
-		xboxController = new Joystick(1);		
-		csvReader = new CSVReader("CheesyConfig.csv"); //Note that this is location on cRIO
-		myself = this;
-
-		alreadyRun = true;
-	}
-
-	printf("instantiated global\n"); 
+Global::Global() {
+	xboxController = new Joystick(1);
+	csvReader = new CSVReader("CheesyConfig.csv");   //Note that this is location on cRIO, not files		
 }
+Joystick* Global::GetXboxController() {return xboxController; }
 
 double Global::GetLeftX() { return xboxController->GetRawAxis(1); }
 double Global::GetLeftY() { return xboxController->GetRawAxis(2); } 
@@ -91,8 +79,3 @@ double Global::LinearizeVictor(double goal_speed) {
 
 	return answer;
 }
-
-Global* Global::GetInstance() {
-	return myself;
-}
-

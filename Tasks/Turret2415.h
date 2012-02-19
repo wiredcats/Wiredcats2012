@@ -8,13 +8,20 @@
 #define WAIT_FOR_INPUT (10)
 #define MOVE_LEFT (20)
 #define MOVE_RIGHT (30)
+#define SHOOT (40)
 
 class Turret2415 : public Task2415 {
 private:
 	Global *global;
 	
-	Jaguar *jagTurret;
-
+	Victor *vicWheel, *vicRotate;
+	
+	Solenoid *fortyFive, *sixty;
+	
+	Encoder *wheelEncoder;
+	
+	DigitalInput *limitLeft, *limitRight;
+	
 public:
 	Turret2415(void);
 	

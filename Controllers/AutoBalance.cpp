@@ -1,7 +1,7 @@
 #include "AutoBalance.h"
 
 AutoBalance2415::AutoBalance2415(void) {
-	global = Global::GetInstance();
+	global = new Global();
 
 	printf("stalling to allow tasks to be initialized\n");
 	Wait(2.0);

@@ -1,10 +1,10 @@
 #include "Drive2415.h"
 
 Drive2415::Drive2415(void) {
-	global = Global::GetInstance();
+	global = new Global();
 
-	jagLeft = new Jaguar(2);
-	jagRight = new Jaguar(1);
+	vicLeft = new Victor(1);
+	vicRight = new Victor(2);
 
 	//taskState = NORMAL_JOYSTICK;
 
@@ -13,9 +13,10 @@ Drive2415::Drive2415(void) {
 
 int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
+	
 	while (keepTaskAlive) { //Deleted all "negative inertia" because unnecessary and causing weird backwards driving
-		if (taskStatus == STATUS_AUTO || taskStatus == STATUS_TELEOP) {			
-			double throttle = global->GetLeftY();
+		if (taskStatus == STATUS_AUTO || taskStatus == STATUS_TELEOP) {
+			double throttle = -global->GetLeftY();
 			double wheel = global->GetRightX();
 			
 			bool isQuickTurn = global->GetLeftTrigger1(); //Get some button (hold-down, not toggle)
@@ -77,8 +78,8 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 							right_pwm = -1.0;
 						}
 			
-			jagLeft->Set(global->LinearizeVictor(left_pwm));
-			jagRight->Set(global->LinearizeVictor(right_pwm));
+			vicLeft->Set(global->LinearizeVictor(left_pwm));
+			vicRight->Set(global->LinearizeVictor(right_pwm));
 		}
 
 		SwapAndWait();

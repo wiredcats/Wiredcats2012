@@ -20,6 +20,8 @@ private:
 	Global *global;
 
 	Victor *vicLeft, *vicRight;
+	
+	Solenoid *lowGear, *highGear;
 
 public:
 	Drive2415(void);
@@ -28,4 +30,3 @@ public:
 };
 
 #endif
-

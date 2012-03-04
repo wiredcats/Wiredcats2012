@@ -7,6 +7,8 @@ Task2415::Task2415(void) {
 	taskName = NULL;
 
 	taskStateComplete = false;
+	
+	PIDSpecific = 0.0;
 
 	isAwake = false;
 	keepTaskAlive = true;
@@ -61,6 +63,12 @@ void Task2415::SetState(int state) {
 	printf("changing %s state to %d\n", taskName, state);
 	taskState = state;
 	taskStateComplete = false;
+}
+
+void Task2415::SetPIDSpecific(double pwm) {
+	if (pwm > 1.0) pwm = 1.0;
+	if (pwm < -1.0) pwm = -1.0;
+	PIDSpecific = pwm;
 }
 
 bool Task2415::StateComplete() {

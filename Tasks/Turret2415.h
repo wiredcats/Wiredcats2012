@@ -9,6 +9,7 @@
 #define MOVE_LEFT (20)
 #define MOVE_RIGHT (30)
 #define SHOOT (40)
+#define PID_SPECIFIC (50)
 
 class Turret2415 : public Task2415 {
 private:
@@ -23,7 +24,7 @@ private:
 	DigitalInput *limitLeft, *limitRight;
 	
 public:
-	Turret2415(void);
+	Turret2415();
 	
 	virtual int Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10);
 };

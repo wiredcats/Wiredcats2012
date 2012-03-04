@@ -1,13 +1,13 @@
 #include "Intake2415.h"
 
-Intake2415::Intake2415(void) {
+Intake2415::Intake2415() {
 	global = new Global();
 	
-	armUp = new Solenoid(1);
-	armDown = new Solenoid(2);
+	armUp = new Solenoid(4);
+	armDown = new Solenoid(3);
 	
-	backplateEngage = new Solenoid(4);
-	backplateDisengage = new Solenoid(3);
+	backplateDisengage = new Solenoid(6);
+	backplateEngage = new Solenoid(5);
 	
 	suction = new Relay(2);
 
@@ -25,7 +25,6 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			}
 			
 			if(global->GetRightTrigger2()) {
-				printf("right Trigger 2 hit\n");
 				backplateEngage->Set(true);
 				backplateDisengage->Set(false);
 			} else {
@@ -34,7 +33,6 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			}
 			
 			if(global->GetLeftTrigger2()) {
-				printf("left trigger 2 hit\n");
 				armUp->Set(false);
 				armDown->Set(true);
 			} else {

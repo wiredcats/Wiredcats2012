@@ -24,6 +24,8 @@ protected:
 	bool isAwake;
 	bool keepTaskAlive;
 	bool taskStateComplete;
+	
+	double PIDSpecific;
 
 public:
 	Task2415(void);
@@ -38,6 +40,7 @@ public:
 	void SetIndividualStatus(TASK_STATUS ts);
 
 	void SetState(int state);
+	void SetPIDSpecific(double pwm);
 	
 	bool StateComplete();
 

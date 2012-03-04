@@ -22,7 +22,7 @@
  * Toggle button so drivers can pick when they want to autotarget
  */
 
-AutoTracker2415::AutoTracker2415(void) {
+AutoTracker2415::AutoTracker2415() {
 	global = new Global();
 
 	printf("stalling to allow tasks to be initialized\n");
@@ -51,8 +51,10 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
     vector<ParticleAnalysisReport>* s_particles;
     
     int prevCentX, prevCentY;
+    double integral = 0.0;
             
     while (keepTaskAlive) {    	
+    	global->ResetCSV(); //Temporary for now for quick change
         Threshold threshold(0,255,0,255,(int)global->ReadCSV("LUMINANCE_LOW"),255);
         ParticleFilterCriteria2 filter[] = {
     			{IMAQ_MT_AREA, 0, global->ReadCSV("PARTICLE_AREA_UPPER_BOUND"), false, false}
@@ -65,7 +67,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         if(global->GetButtonStart()) {
         	taskState = SEARCH_FOR_BEST;
         }
-		
+        		
         if (taskStatus == STATUS_TELEOP || taskStatus == STATUS_AUTO) {
         	if(camera.IsFreshImage()) {
         		HSLimage = camera.GetImage();
@@ -85,10 +87,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 				    bool bestFound;
 				    bestFound = false;
 				    
-					if(global->GetButtonX()){
-						taskState = MANUAL_CONTROL;
-					}
-					turret->SetState(WAIT_FOR_INPUT);
+				    turret->SetState(WAIT_FOR_INPUT);
 					double degreesOff;
 					int targetHeight;
 					degreesOff = 0.0;
@@ -118,42 +117,67 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					} else if(global->GetDPadX() < 0){
 						turret->SetState(MOVE_RIGHT);
 					}
-					
-					if(global->GetButtonY()){
-						taskState = SEARCH_FOR_BEST;
-					}
 					break;
 				case LOCK_AND_FOLLOW:
 					///From previous image
 					//Find current particle that is closest to center of mass
 					//to that particle
-				printf("\nLocked on - Particles found: %d\n", s_particles->size());
+					printf("\nLocked on - Particles found: %d\n", s_particles->size());
 					if(s_particles->size() > 0) {
 						ParticleAnalysisReport closest = SearchForCloseFit(s_particles, prevCentX, prevCentY);
 						printf("Previous: (%d,%d)  Current: (%d,%d)   Dist: %g\n",prevCentX, prevCentY, closest.center_mass_x, closest.center_mass_y, Distance(prevCentX, prevCentY, closest.center_mass_x, closest.center_mass_y));
 						if(Distance(prevCentX, prevCentY, closest.center_mass_x, closest.center_mass_y) > global->ReadCSV("TARGET_DIST_MARGIN")){
 							taskState = SEARCH_FOR_BEST;
 							printf("Stop locked\n");
-						} else {
-							printf("Continue locked\n");
-							taskState = LOCK_AND_FOLLOW;
-							prevCentX = closest.center_mass_x;
-							prevCentY = closest.center_mass_y;
-							if(-(2.0 / 47.0) * ((closest.imageWidth / 2.0) - closest.center_mass_x) > 0) {
-								turret->SetState(MOVE_LEFT);
 							} else {
-								turret->SetState(MOVE_RIGHT);
-							}
-						}
-					} else {
-						taskState = SEARCH_FOR_BEST;
-					}					
+								printf("Continue locked\n");
+								taskState = LOCK_AND_FOLLOW;
+								
+								//PID Loop
+								//Recall that the origin is the top left corner
+								int currentCent = closest.center_mass_x;
+								int error = closest.imageWidth / 2 - currentCent;
+								double deriv = currentCent - prevCentX;
+								
+								integral+=error;
+								if(integral>1) {
+									integral=1;
+								}
+								if(integral<-1){
+									integral=-1;
+								}
+									
+								double kp = global->ReadCSV("KP_TURRET");
+								double ki = global->ReadCSV("KI_TURRET");
+								double kd = global->ReadCSV("KD_TURRET");
+	
+								// Compute the power to send to the arm.
+								double power = kp * error + ki * integral + kd * deriv;
+								
+								if(power > 0 && power < 0.1) power += global->ReadCSV("TURRET_COMPENSATION");
+								if(power < 0 && power > -0.1) power -= global->ReadCSV("TURRET_COMPENSATION");
+								
+								printf("Error: %d, Power:%g\n",error,power);
+								
+								turret->SetPIDSpecific(power);								
+								turret->SetState(PID_SPECIFIC);
+																
+								prevCentX = closest.center_mass_x;
+								prevCentY = closest.center_mass_y;
+								}
+						} else {
+							taskState = SEARCH_FOR_BEST;
+						}					
 					break;
 				default:
 					taskState = SEARCH_FOR_BEST;
 					turret->SetState(WAIT_FOR_INPUT);
 					break;
 			}
+			
+			if(global->GetButtonX()) {
+	        	turret->SetState(SHOOT);
+	        }			
 		}
 		SwapAndWait();
 	}

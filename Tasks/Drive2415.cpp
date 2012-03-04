@@ -1,10 +1,13 @@
 #include "Drive2415.h"
 
-Drive2415::Drive2415(void) {
-	global = new Global();
+Drive2415::Drive2415() {
+	global = new Global;
 
 	vicLeft = new Victor(1);
 	vicRight = new Victor(2);
+	
+	lowGear = new Solenoid(7);
+	highGear = new Solenoid(8);
 
 	//taskState = NORMAL_JOYSTICK;
 
@@ -14,13 +17,28 @@ Drive2415::Drive2415(void) {
 int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
+	bool prevTrigState = true;
+	bool isHighGear = false;
+	
 	while (keepTaskAlive) { //Deleted all "negative inertia" because unnecessary and causing weird backwards driving
 		if (taskStatus == STATUS_AUTO || taskStatus == STATUS_TELEOP) {
+			if(global->GetRightTrigger1() && !prevTrigState) { //Toggle structure
+				if(isHighGear) {
+					isHighGear = false;
+					highGear->Set(false);
+					lowGear->Set(true);
+				} else {
+					isHighGear = true;
+					highGear->Set(true);
+					lowGear->Set(false);
+				}
+			}			
+			prevTrigState = global->GetRightTrigger1();
+			
 			double throttle = -global->GetLeftY();
 			double wheel = global->GetRightX();
 			
-			bool isQuickTurn = global->GetLeftTrigger1(); //Get some button (hold-down, not toggle)
-			bool isHighGear = global->GetButtonA(); //Get some button (hold-up)
+			bool isQuickTurn = global->GetLeftTrigger1(); 
 			
 			float linear_power = throttle;
 			
@@ -55,7 +73,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			if (isQuickTurn) {
 				overPower = 1.0;
 				sensitivity = 1.0;
-				angular_power = -wheel;
+				angular_power = wheel;
 			} else {
 				overPower = 0.0;
 				angular_power = throttle * wheel * sensitivity; //Unabsolute valued this so that the turns wouldn't be backwards
@@ -79,7 +97,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 						}
 			
 			vicLeft->Set(global->LinearizeVictor(left_pwm));
-			vicRight->Set(global->LinearizeVictor(right_pwm));
+			vicRight->Set(global->LinearizeVictor(-right_pwm));
 		}
 
 		SwapAndWait();

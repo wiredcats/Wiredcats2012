@@ -14,36 +14,61 @@ class Global{
 public:
 	Global();
 	
-	Joystick* GetXboxController();
-
-	//NOTE DO NOT HIT MODE SWITCH. THIS WILL CHANGE LEFT Y INTO DPAD Y	
-	double GetLeftX();
-	double GetLeftY();
-	double GetRightX();
-	double GetRightY();
-	double GetDPadX();
-	
-	bool GetLeftTrigger2();
-	bool GetRightTrigger2();
-	
-	bool GetButtonA();
-	bool GetButtonB();
-	bool GetButtonX();
-	bool GetButtonY();
-	bool GetLeftTrigger1();
-	bool GetRightTrigger1();
-	bool GetButtonBack();
-	bool GetButtonStart();
-	bool GetLeftPushDown();
-	bool GetRightPushDown();
+	//NOTE: DO NOT HIT MODE SWITCH. THIS WILL CHANGE LEFT Y INTO DPAD Y	
 		
 	double ReadCSV(const std::string& valueName);
 	void ResetCSV();
 	
 	double LinearizeVictor(double goal_speed);
 	
+	//Primary Controller
+	double PrimaryGetLeftX();
+	double PrimaryGetLeftY();
+	double PrimaryGetRightX();
+	double PrimaryGetRightY();
+	double PrimaryGetDPadX();
+	
+	bool PrimaryGetLeftBumper();
+	bool PrimaryGetRightBumper();
+	bool PrimaryGetLeftTrigger();
+	bool PrimaryGetRightTrigger();
+	
+	bool PrimaryGetButtonA();
+	bool PrimaryGetButtonB();
+	bool PrimaryGetButtonX();
+	bool PrimaryGetButtonY();
+	
+	bool PrimaryGetButtonBack();
+	bool PrimaryGetButtonStart();
+	
+	bool PrimaryGetLeftPushDown();
+	bool PrimaryGetRightPushDown();
+	
+	//Secondary Controller
+	double SecondaryGetLeftX();
+	double SecondaryGetLeftY();
+	double SecondaryGetRightX();
+	double SecondaryGetRightY();
+	double SecondaryGetDPadX();
+	
+	bool SecondaryGetLeftBumper();
+	bool SecondaryGetRightBumper();
+	bool SecondaryGetLeftTrigger();
+	bool SecondaryGetRightTrigger();
+	
+	bool SecondaryGetButtonA();
+	bool SecondaryGetButtonB();
+	bool SecondaryGetButtonX();
+	bool SecondaryGetButtonY();
+	
+	bool SecondaryGetButtonBack();
+	bool SecondaryGetButtonStart();
+	
+	bool SecondaryGetLeftPushDown();
+	bool SecondaryGetRightPushDown();
+	
 private:
-	Joystick *xboxController;
+	Joystick *primaryController, *secondaryController;
 	CSVReader* csvReader;	
 };
 

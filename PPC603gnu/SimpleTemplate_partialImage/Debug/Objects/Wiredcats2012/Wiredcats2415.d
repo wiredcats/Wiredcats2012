@@ -328,11 +328,15 @@ SimpleTemplate_partialImage/Debug/Objects/Wiredcats2012/Wiredcats2415.o:  \
   C:/windriver/workspace/Wiredcats2012/Tasks/../Global.h \
   C:/windriver/workspace/Wiredcats2012/Tasks/Turret2415.h \
   C:/windriver/workspace/Wiredcats2012/Tasks/Intake2415.h \
-  C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h \
+  C:/windriver/workspace/Wiredcats2012/Controllers/AutoBalance.h \
   C:/windriver/vxworks-6.3/target/h/WPILib/WPILib.h \
-  C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h \
+  C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Drive2415.h \
   C:/windriver/workspace/Wiredcats2012/Controllers/../Task2415.h \
-  C:/windriver/workspace/Wiredcats2012/Controllers/../Global.h
+  C:/windriver/workspace/Wiredcats2012/Controllers/../Global.h \
+  C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h \
+  C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h \
+  C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Intake2415.h \
+  C:/windriver/workspace/Wiredcats2012/Controllers/Autonomous.h
 
 C:/windriver/workspace/Wiredcats2012/Wiredcats2415.h:
 
@@ -990,12 +994,20 @@ C:/windriver/workspace/Wiredcats2012/Tasks/Turret2415.h:
 
 C:/windriver/workspace/Wiredcats2012/Tasks/Intake2415.h:
 
-C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h:
+C:/windriver/workspace/Wiredcats2012/Controllers/AutoBalance.h:
 
 C:/windriver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
-C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h:
+C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Drive2415.h:
 
 C:/windriver/workspace/Wiredcats2012/Controllers/../Task2415.h:
 
 C:/windriver/workspace/Wiredcats2012/Controllers/../Global.h:
+
+C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h:
+
+C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h:
+
+C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Intake2415.h:
+
+C:/windriver/workspace/Wiredcats2012/Controllers/Autonomous.h:

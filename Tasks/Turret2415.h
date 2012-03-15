@@ -4,12 +4,17 @@
 #include "WPILib.h"
 #include "../Task2415.h"
 #include "../Global.h"
+#include <math.h>
 
 #define WAIT_FOR_INPUT (10)
 #define MOVE_LEFT (20)
 #define MOVE_RIGHT (30)
-#define SHOOT (40)
-#define PID_SPECIFIC (50)
+#define PID_SPECIFIC (40)
+
+//TODO: Put this into the text document
+//We will end up having 2 CSV for each robot
+const double LEFT_LIMIT = 1.88;
+const double RIGHT_LIMIT = 4.79;
 
 class Turret2415 : public Task2415 {
 private:
@@ -21,7 +26,7 @@ private:
 	
 	Encoder *wheelEncoder;
 	
-	DigitalInput *limitLeft, *limitRight;
+	AnalogChannel *pot;
 	
 public:
 	Turret2415();

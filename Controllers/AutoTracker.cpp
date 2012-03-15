@@ -2,34 +2,15 @@
 #include <nivision.h>
 #include <math.h>
 
-/*
- * TODO: Ideas for future tracking
- * ----------------------------
- * To lock on to the target, once already found it, 
- * pick the target which had center of mass closest to previous locked on target.
- * 
- * If lose track of image, make turret move to look for target and repeat original ideal vision track.
- * 
- * When want to center turret on target
- * Do PID loop for the imgwidth / 2 - C_x
- * 
- * When do distance calculations
- * Check out the bounding rectangle length / width compared to standard.
- * 
- * Do distance calculations for shooter. Only do calculations when toggle button
- * This calculation will set the flywheel speed at a certain speed to the right speed for distance
- *
- * Toggle button so drivers can pick when they want to autotarget
- */
-
 AutoTracker2415::AutoTracker2415() {
 	global = new Global();
 
 	printf("stalling to allow tasks to be initialized\n");
 	Wait(2.0);
 	turret = Task2415::SearchForTask("turret2415");
+	intake = Task2415::SearchForTask("intake2415");
 	
-	taskState = SEARCH_FOR_BEST;
+	taskState = MANUAL_CONTROL;
 
 	Start("autotracker2415");
 }
@@ -54,26 +35,32 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
     double integral = 0.0;
             
     while (keepTaskAlive) {    	
-    	global->ResetCSV(); //Temporary for now for quick change
         Threshold threshold(0,255,0,255,(int)global->ReadCSV("LUMINANCE_LOW"),255);
         ParticleFilterCriteria2 filter[] = {
     			{IMAQ_MT_AREA, 0, global->ReadCSV("PARTICLE_AREA_UPPER_BOUND"), false, false}
         };      
         
-        if(global->GetButtonBack()) {
+        if(global->SecondaryGetButtonBack()) {
         	taskState = MANUAL_CONTROL;
         }
         
-        if(global->GetButtonStart()) {
+        if(global->SecondaryGetButtonStart()) {
         	taskState = SEARCH_FOR_BEST;
+        }        	
+        
+        if(taskStatus == STATUS_DISABLED) {
+        	global->ResetCSV();
+        	integral = 0.0;
         }
         		
         if (taskStatus == STATUS_TELEOP || taskStatus == STATUS_AUTO) {
-        	if(camera.IsFreshImage()) {
+        	if(camera.IsFreshImage() && taskState != MANUAL_CONTROL) {
         		HSLimage = camera.GetImage();
 				BWimage = HSLimage->ThresholdHSL(threshold);
 				imaqImage = BWimage->GetImaqImage();
 				imaqParticleFilter4(imaqImage,imaqImage,filter,1,options,NULL,NULL);
+				imaqMorphology(imaqImage,imaqImage,IMAQ_DILATE,NULL);
+				imaqMorphology(imaqImage,imaqImage,IMAQ_DILATE,NULL);
 				imaqConvexHull(imaqImage,imaqImage,true);
 				s_particles = BWimage->GetOrderedParticleAnalysisReports();
 				
@@ -83,38 +70,38 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         	}
         							
 			switch (taskState) {
-				case SEARCH_FOR_BEST:
-				    bool bestFound;
-				    bestFound = false;
-				    
+				case SEARCH_FOR_BEST:	     					
 				    turret->SetState(WAIT_FOR_INPUT);
-					double degreesOff;
 					int targetHeight;
-					degreesOff = 0.0;
 					targetHeight = 0;
+					
+					//TODO: Not sure this is right application of PID
+				    integral = 0.0;
 					
 					printf("Particles Found!: %d\n", s_particles->size());										
 					if(s_particles->size() > 0) {
 						ratioBest = FindRatioBest(s_particles);
-						if(fabs(Ratio(ratioBest)- 4.0/3.0) <= global->ReadCSV("TARGET_MARGIN_OF_ERROR")) { //Ratio is not the only measurement, when tilted, can be as far off as 1
-							double degreesOff = -(2.0 / 47.0) * ((ratioBest.imageWidth / 2.0) - ratioBest.center_mass_x); //FOV of the M1011 is 47 degrees. Run PID loop on this to 0
+						if(fabs(SideRatio(ratioBest)- 4.0/3.0) <= global->ReadCSV("TARGET_MARGIN_OF_ERROR")) { //Ratio is not the only measurement, when tilted, can be as far off as 1
 							targetHeight = ratioBest.imageHeight - ratioBest.center_mass_y;
-							printf("Best:    X:%d      Y:%d      Ratio:%g      Deg:%g   Height:%d\n", ratioBest.center_mass_x, ratioBest.center_mass_y, Ratio(ratioBest), degreesOff, targetHeight);
+							printf("Best:(%d,%d)    SideRatio:%g    Area:%g    AreaRatio:%g   Height:%d\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest), ratioBest.particleArea, AreaRatio(ratioBest), targetHeight);
 							taskState = LOCK_AND_FOLLOW;
 							prevCentX = ratioBest.center_mass_x;
 							prevCentY = ratioBest.center_mass_y;
 						} else { //TODO: Find another method that isn't so concerned about ratio. Consistnently one target and stay lcoked on
 							//TODO: Write PID Loop that centers the loop on closest one?
 							//TODO: Or pick one where center of mass differ most from BB center of mass (most skew)? 
-							printf("Closest:   X:%d      Y:%d      Ratio:%g\n", ratioBest.center_mass_x, ratioBest.center_mass_y, Ratio(ratioBest));
+							//TODO: Closest in area???
+							printf("Closest:(%d,%d)    SideRatio:%g    AreaRatio:%g\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest),AreaRatio(ratioBest));
 						}
 					}
 					break;
 				case MANUAL_CONTROL:
-					turret->SetState(WAIT_FOR_INPUT);
-					if(global->GetDPadX() > 0) {
+					turret->SetPIDSpecific(-global->SecondaryGetLeftX() * 0.2);
+					turret->SetState(PID_SPECIFIC);
+					if(global->SecondaryGetDPadX() < 0) {
 						turret->SetState(MOVE_LEFT);
-					} else if(global->GetDPadX() < 0){
+					}
+					if(global->SecondaryGetDPadX() > 0){
 						turret->SetState(MOVE_RIGHT);
 					}
 					break;
@@ -137,25 +124,18 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 								//Recall that the origin is the top left corner
 								int currentCent = closest.center_mass_x;
 								int error = closest.imageWidth / 2 - currentCent;
-								double deriv = currentCent - prevCentX;
+								double deriv = prevCentX - currentCent;
 								
 								integral+=error;
-								if(integral>1) {
-									integral=1;
-								}
-								if(integral<-1){
-									integral=-1;
-								}
 									
 								double kp = global->ReadCSV("KP_TURRET");
 								double ki = global->ReadCSV("KI_TURRET");
 								double kd = global->ReadCSV("KD_TURRET");
-	
+								
+								printf("PID: (%g, %g, %g)\n",kp,ki,kd);
+									
 								// Compute the power to send to the arm.
 								double power = kp * error + ki * integral + kd * deriv;
-								
-								if(power > 0 && power < 0.1) power += global->ReadCSV("TURRET_COMPENSATION");
-								if(power < 0 && power > -0.1) power -= global->ReadCSV("TURRET_COMPENSATION");
 								
 								printf("Error: %d, Power:%g\n",error,power);
 								
@@ -174,10 +154,6 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					turret->SetState(WAIT_FOR_INPUT);
 					break;
 			}
-			
-			if(global->GetButtonX()) {
-	        	turret->SetState(SHOOT);
-	        }			
 		}
 		SwapAndWait();
 	}
@@ -189,17 +165,24 @@ ParticleAnalysisReport AutoTracker2415::FindRatioBest(vector<ParticleAnalysisRep
 	int best = 0;
 	
 	for(int i = 1; i < size; i++) {
-		if((fabs(Ratio(vec->at(best)) - 4.0/3.0)) >= (fabs(Ratio(vec->at(i)) - 4.0/3.0))) {
-			best = i;
+		if((fabs(SideRatio(vec->at(best)) - 4.0/3.0)) >= (fabs(SideRatio(vec->at(i)) - 4.0/3.0))) {
+			if(AreaRatio(vec->at(i)) >= global->ReadCSV("AREA_RATIO_LOWER_BOUND")) {
+				best = i;
+			}
 		}
 	}
 	return(vec->at(best));
 }
 
-double AutoTracker2415::Ratio(ParticleAnalysisReport vec) {
+double AutoTracker2415::SideRatio(ParticleAnalysisReport vec) {
 	double tempW = vec.boundingRect.width;
 	double tempH = vec.boundingRect.height;
 	return tempW / tempH;
+}
+
+double AutoTracker2415::AreaRatio(ParticleAnalysisReport vec) {	
+	double bbArea = vec.boundingRect.height * vec.boundingRect.width;
+	return (vec.particleArea / bbArea);
 }
 
 int AutoTracker2415::BoundingBoxCenterX(ParticleAnalysisReport vec) {

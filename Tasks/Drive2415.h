@@ -7,11 +7,9 @@
 #include <math.h>
 
 #define NORMAL_JOYSTICK (10)
-#define GO_STRAIGHT (20)
-#define MOVE_BACK (30)
-#define STOP_BOT (40)
-#define GO_BACKDRIVE_STRAIGHT (50)
-#define MOVE_BACKDRIVE_BACK (60)
+#define AUTOBALANCE (20)
+
+#define FORWARD (7)
 
 const float PI = 3.1415926;
 

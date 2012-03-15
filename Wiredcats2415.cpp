@@ -12,6 +12,7 @@ Wiredcats2415::Wiredcats2415(void) {
 }
 
 void Wiredcats2415::Disabled(void) {
+	Task2415::SetTaskStatuses(STATUS_DISABLED);
 	global.ResetCSV();
 }
 

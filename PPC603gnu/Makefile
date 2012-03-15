@@ -170,6 +170,10 @@ SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/AutoTr
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
+SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/Autonomous.o : C:/windriver/workspace/Wiredcats2012/Controllers/Autonomous.cpp
+	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
+
+
 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Global.o : C:/windriver/workspace/Wiredcats2012/Global.cpp
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
@@ -201,6 +205,7 @@ SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Wiredcats2415.o : 
 OBJECTS_SimpleTemplate_partialImage = SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/CSV/CSVReader.o \
 	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/AutoBalance.o \
 	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/AutoTracker.o \
+	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/Autonomous.o \
 	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Global.o \
 	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Task2415.o \
 	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Drive2415.o \
@@ -220,9 +225,9 @@ SimpleTemplate_partialImage/$(MODE_DIR)/SimpleTemplate_partialImage_clean :
 	$(TRACE_FLAG)if [ -d "SimpleTemplate_partialImage" ]; then cd "SimpleTemplate_partialImage"; rm -rf $(MODE_DIR); fi
 
 DEP_FILES := SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/CSV/CSVReader.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/AutoBalance.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/AutoTracker.d \
-	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Global.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Task2415.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Drive2415.d \
-	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Intake2415.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/TaskTemplate2415.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Turret2415.d \
-	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Wiredcats2415.d
+	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Controllers/Autonomous.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Global.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Task2415.d \
+	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Drive2415.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Intake2415.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/TaskTemplate2415.d \
+	 SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Tasks/Turret2415.d SimpleTemplate_partialImage/$(MODE_DIR)/Objects/Wiredcats2012/Wiredcats2415.d
 -include $(DEP_FILES)
 
 

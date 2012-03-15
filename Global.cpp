@@ -1,30 +1,10 @@
 #include "Global.h"
 
 Global::Global() {
-	xboxController = new Joystick(1);
+	primaryController = new Joystick(1);
+	secondaryController = new Joystick(2);
 	csvReader = new CSVReader("CheesyConfig.csv");   //Note that this is location on cRIO, not files		
 }
-Joystick* Global::GetXboxController() {return xboxController; }
-
-double Global::GetLeftX() { return xboxController->GetRawAxis(1); }
-double Global::GetLeftY() { return xboxController->GetRawAxis(2); } 
-double Global::GetRightX() {return xboxController->GetRawAxis(4); }
-double Global::GetRightY() { return xboxController->GetRawAxis(5); }
-double Global::GetDPadX() { return xboxController->GetRawAxis(6); }
-
-bool Global::GetLeftTrigger2() { return (xboxController->GetRawAxis(3) > 0); }
-bool Global::GetRightTrigger2() { return (xboxController->GetRawAxis(3) < 0); }
-
-bool Global::GetButtonA() {return xboxController->GetRawButton(1); }
-bool Global::GetButtonB() {return xboxController->GetRawButton(2); }
-bool Global::GetButtonX() {return xboxController->GetRawButton(3); }
-bool Global::GetButtonY() {return xboxController->GetRawButton(4); }
-bool Global::GetLeftTrigger1() {return (xboxController->GetRawButton(5)); }
-bool Global::GetRightTrigger1() { return(xboxController->GetRawButton(6)); }
-bool Global::GetButtonBack() { return xboxController->GetRawButton(7); }
-bool Global::GetButtonStart() {return xboxController->GetRawButton(8); }
-bool Global::GetLeftPushDown() {return xboxController->GetRawButton(9); }
-bool Global::GetRightPushDown() {return xboxController->GetRawButton(10); }
 
 double Global::ReadCSV(const std::string& valueName) { return(csvReader->GetValue(valueName)); }
 void Global::ResetCSV() { csvReader->ReloadValues(); }
@@ -79,3 +59,45 @@ double Global::LinearizeVictor(double goal_speed) {
 
 	return answer;
 }
+
+//Primary Controller
+double Global::PrimaryGetLeftX() { return primaryController->GetRawAxis(1); }
+double Global::PrimaryGetLeftY() { return primaryController->GetRawAxis(2); } 
+double Global::PrimaryGetRightX() {return primaryController->GetRawAxis(4); }
+double Global::PrimaryGetRightY() { return primaryController->GetRawAxis(5); }
+double Global::PrimaryGetDPadX() { return primaryController->GetRawAxis(6); }
+
+bool Global::PrimaryGetLeftTrigger() { return (primaryController->GetRawAxis(3) > 0); }
+bool Global::PrimaryGetRightTrigger() { return (primaryController->GetRawAxis(3) < 0); }
+
+bool Global::PrimaryGetButtonA() {return primaryController->GetRawButton(1); }
+bool Global::PrimaryGetButtonB() {return primaryController->GetRawButton(2); }
+bool Global::PrimaryGetButtonX() {return primaryController->GetRawButton(3); }
+bool Global::PrimaryGetButtonY() {return primaryController->GetRawButton(4); }
+bool Global::PrimaryGetLeftBumper() {return (primaryController->GetRawButton(5)); }
+bool Global::PrimaryGetRightBumper() { return(primaryController->GetRawButton(6)); }
+bool Global::PrimaryGetButtonBack() { return primaryController->GetRawButton(7); }
+bool Global::PrimaryGetButtonStart() {return primaryController->GetRawButton(8); }
+bool Global::PrimaryGetLeftPushDown() {return primaryController->GetRawButton(9); }
+bool Global::PrimaryGetRightPushDown() {return primaryController->GetRawButton(10); }
+
+//Secondary Controller
+double Global::SecondaryGetLeftX() { return secondaryController->GetRawAxis(1); }
+double Global::SecondaryGetLeftY() { return secondaryController->GetRawAxis(2); } 
+double Global::SecondaryGetRightX() {return secondaryController->GetRawAxis(4); }
+double Global::SecondaryGetRightY() { return secondaryController->GetRawAxis(5); }
+double Global::SecondaryGetDPadX() { return secondaryController->GetRawAxis(6); }
+
+bool Global::SecondaryGetLeftTrigger() { return (secondaryController->GetRawAxis(3) > 0); }
+bool Global::SecondaryGetRightTrigger() { return (secondaryController->GetRawAxis(3) < 0); }
+
+bool Global::SecondaryGetButtonA() {return secondaryController->GetRawButton(1); }
+bool Global::SecondaryGetButtonB() {return secondaryController->GetRawButton(2); }
+bool Global::SecondaryGetButtonX() {return secondaryController->GetRawButton(3); }
+bool Global::SecondaryGetButtonY() {return secondaryController->GetRawButton(4); }
+bool Global::SecondaryGetLeftBumper() {return (secondaryController->GetRawButton(5)); }
+bool Global::SecondaryGetRightBumper() { return(secondaryController->GetRawButton(6)); }
+bool Global::SecondaryGetButtonBack() { return secondaryController->GetRawButton(7); }
+bool Global::SecondaryGetButtonStart() {return secondaryController->GetRawButton(8); }
+bool Global::SecondaryGetLeftPushDown() {return secondaryController->GetRawButton(9); }
+bool Global::SecondaryGetRightPushDown() {return secondaryController->GetRawButton(10); }

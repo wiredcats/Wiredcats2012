@@ -1,5 +1,21 @@
 #include "Drive2415.h"
 
+//	bool prevTrigState = true;
+//	bool isHighGear = false;
+	
+	//			if(global->GetRightTrigger1() && !prevTrigState) { //Toggle structure
+	//				if(isHighGear) {
+	//					isHighGear = false;
+	//					highGear->Set(false);
+	//					lowGear->Set(true);
+	//				} else {
+	//					isHighGear = true;
+	//					highGear->Set(true);
+	//					lowGear->Set(false);
+	//				}
+	//			}			
+	//			prevTrigState = global->GetRightTrigger1();
+
 Drive2415::Drive2415() {
 	global = new Global;
 
@@ -17,28 +33,42 @@ Drive2415::Drive2415() {
 int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
-	bool prevTrigState = true;
-	bool isHighGear = false;
-	
 	while (keepTaskAlive) { //Deleted all "negative inertia" because unnecessary and causing weird backwards driving
-		if (taskStatus == STATUS_AUTO || taskStatus == STATUS_TELEOP) {
-			if(global->GetRightTrigger1() && !prevTrigState) { //Toggle structure
-				if(isHighGear) {
-					isHighGear = false;
-					highGear->Set(false);
-					lowGear->Set(true);
-				} else {
-					isHighGear = true;
-					highGear->Set(true);
-					lowGear->Set(false);
-				}
-			}			
-			prevTrigState = global->GetRightTrigger1();
+		if(taskStatus == STATUS_DISABLED) {
+			global->ResetCSV();
+		}
+		
+		if(taskStatus == STATUS_AUTO) {
+			switch(taskState){
+			case FORWARD:
+				vicLeft->Set(global->ReadCSV("AUTONOMOUS_DRIVE_SPEED"));
+				vicRight->Set(global->ReadCSV("AUTONOMOUS_DRIVE_SPEED"));
+				break;
+			default:
+				vicLeft->Set(0.0);
+				vicRight->Set(0.0);
+				break;
+			}
+		}
+		
+		if (taskStatus == STATUS_TELEOP) {			
+			double throttle = -global->PrimaryGetLeftY();
+			double wheel = global->PrimaryGetRightX();
 			
-			double throttle = -global->GetLeftY();
-			double wheel = global->GetRightX();
+			if(taskState == AUTOBALANCE) {
+				throttle *= global->ReadCSV("BALANCE_SLOW_DRIVE");
+			}
+						
+			bool isQuickTurn = global->PrimaryGetLeftBumper(); 
+			bool isHighGear = global->PrimaryGetLeftTrigger();
 			
-			bool isQuickTurn = global->GetLeftTrigger1(); 
+			if(isHighGear){
+				highGear->Set(false);
+				lowGear->Set(true);
+			} else {
+				highGear->Set(true);
+				lowGear->Set(false);
+			}
 			
 			float linear_power = throttle;
 			

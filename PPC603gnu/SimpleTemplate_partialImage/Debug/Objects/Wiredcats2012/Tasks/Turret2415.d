@@ -321,7 +321,8 @@
   C:/windriver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/windriver/workspace/Wiredcats2012/Tasks/../Defines.h \
   C:/windriver/workspace/Wiredcats2012/Tasks/../Global.h \
-  C:/windriver/workspace/Wiredcats2012/Tasks/../CSV/CSVReader.h
+  C:/windriver/workspace/Wiredcats2012/Tasks/../CSV/CSVReader.h \
+  C:/windriver/vxworks-6.3/target/h/math.h
 
 C:/windriver/workspace/Wiredcats2012/Tasks/Turret2415.h:
 
@@ -964,3 +965,5 @@ C:/windriver/workspace/Wiredcats2012/Tasks/../Defines.h:
 C:/windriver/workspace/Wiredcats2012/Tasks/../Global.h:
 
 C:/windriver/workspace/Wiredcats2012/Tasks/../CSV/CSVReader.h:
+
+C:/windriver/vxworks-6.3/target/h/math.h:

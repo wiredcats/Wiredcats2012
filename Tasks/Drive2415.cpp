@@ -51,6 +51,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 		// State: Teleop
 		//////////////////////////////////////		
 		if (taskStatus == STATUS_TELEOP) {			
+			//TODO: NEED TO TUNE THESE BETTER
 			double throttle = -global->PrimaryGetLeftY();
 			double wheel = global->PrimaryGetRightX();
 			
@@ -78,9 +79,8 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			
 			double wheelNonLinearity;
 			
-			wheelNonLinearity = global->ReadCSV("TURN_NONLIN_LOW");
+			wheelNonLinearity = global->ReadCSV("TURN_NONLIN");
 			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);	
-			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
 			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
 			
 			double left_pwm, right_pwm, overPower;

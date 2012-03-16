@@ -51,18 +51,12 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		if(taskStatus == STATUS_AUTO){
 			switch(taskState) {
 			case WAIT_FOR_INPUT:
-				if(twoBallShoot->Get() >= global->ReadCSV("TWO_BALL_SHOOT")) {
-					backplateEngage->Set(false);
-					backplateDisengage->Set(true);
-					twoBallShoot->Stop();
-					twoBallShoot->Reset();
-				}
+				suction->Set(suction->kOff);
 				break;
 			case AUTONOMOUS_SHOOT:			
+				suction->Set(suction->kForward);
 				backplateEngage->Set(true);
 				backplateDisengage->Set(false);
-				twoBallShoot->Start();
-				taskState = WAIT_FOR_INPUT;
 				break;
 			default:
 				break;
@@ -79,7 +73,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				suction->Set(suction->kForward);
 			}
 			
-			if(global->PrimaryGetButtonY() && intakeOn == true) {
+			if(global->SecondaryGetButtonY() && intakeOn == true) {
 				suction->Set(suction->kReverse); 
 			} 
 			

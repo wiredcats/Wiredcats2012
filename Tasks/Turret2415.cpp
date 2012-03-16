@@ -61,29 +61,25 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		// State: Autonomous
 		//////////////////////////////////////		
 		if(taskStatus == STATUS_AUTO){
-			switch(taskState){
-			case AUTO_FIRE:
-				double current = wheelEncoder->GetRate();
-	//			printf("Encoder: %g\n",current);
-				double error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
+			fortyFive->Set(true);
+			sixty->Set(false);	
+			double current = wheelEncoder->GetRate();
+			printf("Encoder: %g\n",current);
+			double error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
+			
+			integral+=error;
 				
-				integral+=error;
-					
-				double kp = global->ReadCSV("KP_FLYWHEEL");
-				double ki = global->ReadCSV("KI_FLYWHEEL");
-				
-				double power = kp * error + ki * integral;
-				
-	//			printf("Error: %g, Power:%g\n",error,power);					
-				if(power > 0) {
-					vicWheel->Set(power);		
-				} else {
-					vicWheel->Set(0.1);
-				}
-				break;
-			default:
-				break;
-			}			
+			double kp = global->ReadCSV("KP_FLYWHEEL");
+			double ki = global->ReadCSV("KI_FLYWHEEL");
+			
+			double power = kp * error + ki * integral;
+			
+//			printf("Error: %g, Power:%g\n",error,power);					
+			if(power > 0) {
+				vicWheel->Set(power);		
+			} else {
+				vicWheel->Set(0.1);
+			}
 		}
 		
 		//////////////////////////////////////
@@ -92,34 +88,13 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		if (taskStatus == STATUS_TELEOP) {
 //			printf("Pot: %g\n",pot->GetVoltage());			
 			
-			// Hood control //
-			
-			if(global->SecondaryGetRightTrigger() && !prevTrigState) {
-				if(isSixty){
-					isSixty = false;
-					fortyFive->Set(true);
-					sixty->Set(false);
-				} else {
-					isSixty = true;
-					fortyFive->Set(false);
-					sixty->Set(true);
-				}
-			}
-			prevTrigState = global->SecondaryGetRightTrigger();
+			fortyFive->Set(false);
+			sixty->Set(true);	
 			
 			// PID LOOP OF AWESOMENESS //
 			
 			double goal;
-			
-			if(global->SecondaryGetButtonA() && !prevAState){
-				goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
-			}
-			if(global->SecondaryGetButtonB() && !prevBState){
-				goal = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED");
-			}
-			if(global->SecondaryGetButtonY() && !prevYState){
-//				goal = global->ReadCSV("");
-			}
+			goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
 			
 			double current = wheelEncoder->GetRate();
 //			printf("Encoder: %g\n",current);

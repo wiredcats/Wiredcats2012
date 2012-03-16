@@ -5,6 +5,7 @@
 #include "Controllers/AutoBalance.h"
 #include "Controllers/AutoTracker.h"
 #include "Controllers/Autonomous.h"
+#include "Controllers/ShootController.h"
 
 //Tasks
 Drive2415 drive; 
@@ -14,4 +15,5 @@ Intake2415 intake;
 //Controllers
 AutoBalance2415 autobalance;
 AutoTracker2415 autotracker;
-//Autonomous2415 autonomous;
+Autonomous2415 autonomous;
+//Shoot2415 shoot;

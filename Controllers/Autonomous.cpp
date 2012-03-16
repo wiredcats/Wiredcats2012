@@ -6,7 +6,7 @@ Autonomous::Autonomous(void) {
 	drive = Task2415::SearchForTask("drive2415");
 	intake = Task2415::SearchForTask("intake2415");
 	
-	driveTimer = new Timer();
+	waitTimer = new Timer();
 	
 	printf("stalling to allow tasks to be initialized\n");
 	Wait(1.0);
@@ -21,25 +21,21 @@ int Autonomous::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	while (keepTaskAlive) {
 		if(taskStatus == STATUS_DISABLED){
 			global->ResetCSV();
-			driveTimer->Stop();
-			driveTimer->Reset();
+			waitTimer->Stop();
+			waitTimer->Reset();
 		}		
 		if (taskStatus == STATUS_AUTO) {
-			//Drive until right time value == right up against fender
-			//Shoot with fender shot
-			
+			//Wait for a bit and then shoot with key shot
 			switch(taskState) {
 			case START:
-				drive->SetState(FORWARD);
-				driveTimer->Start();
-				taskState = DRIVE_FORWARD;
+				waitTimer->Start();
+				taskState = WAIT_FORWARD;
 				break;
-			case DRIVE_FORWARD:
-				if(driveTimer->Get() >= global->ReadCSV("AUTONOMOUS_DRIVE_TIME") ) {
+			case WAIT_FORWARD:
+				if(waitTimer->Get() >= global->ReadCSV("AUTONOMOUS_WAIT_TIME") ) {
 					taskState = SHOOT;
-					driveTimer->Stop();
-					driveTimer->Reset();
-					drive->SetState(NORMAL_JOYSTICK);
+					waitTimer->Stop();
+					waitTimer->Reset();
 				}
 				break;
 			case SHOOT:

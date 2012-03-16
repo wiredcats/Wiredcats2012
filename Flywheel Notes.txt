@@ -5,3 +5,6 @@
 6000 - 45 degree key shot (much better than 60 degree)
 
 7250- 20 feet, for 45 degree
+
+-----------
+Real Bot:

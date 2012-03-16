@@ -6,10 +6,12 @@ Turret2415::Turret2415() {
 	vicWheel = new Victor(3);
 	vicRotate = new Victor(4);
 	
-	fortyFive = new Solenoid(2);
-	sixty = new Solenoid(1);
+	fortyFive = new Solenoid(1);
+	sixty = new Solenoid(2);
 	
-	wheelEncoder = new Encoder(1,2,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
+	//For practice bot, (1,2...)
+	//For real bot, (2,1...)
+	wheelEncoder = new Encoder(2,1,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
 
 	taskState = WAIT_FOR_INPUT;
 	

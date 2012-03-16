@@ -19,7 +19,7 @@ private:
 
 	Victor *vicLeft, *vicRight;
 	
-	Solenoid *lowGear, *highGear;
+	Solenoid *brakeOff, *brakeNow;
 
 public:
 	Drive2415(void);

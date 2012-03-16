@@ -1,29 +1,13 @@
 #include "Drive2415.h"
 
-//	bool prevTrigState = true;
-//	bool isHighGear = false;
-	
-	//			if(global->GetRightTrigger1() && !prevTrigState) { //Toggle structure
-	//				if(isHighGear) {
-	//					isHighGear = false;
-	//					highGear->Set(false);
-	//					lowGear->Set(true);
-	//				} else {
-	//					isHighGear = true;
-	//					highGear->Set(true);
-	//					lowGear->Set(false);
-	//				}
-	//			}			
-	//			prevTrigState = global->GetRightTrigger1();
-
 Drive2415::Drive2415() {
 	global = new Global;
 
 	vicLeft = new Victor(1);
 	vicRight = new Victor(2);
 	
-	lowGear = new Solenoid(7);
-	highGear = new Solenoid(8);
+	brakeOff = new Solenoid(7);
+	brakeNow = new Solenoid(8);
 
 	//taskState = NORMAL_JOYSTICK;
 
@@ -33,9 +17,14 @@ Drive2415::Drive2415() {
 int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
+	bool isBraked, prevTwoTriggerStates;
+	
 	while (keepTaskAlive) { //Deleted all "negative inertia" because unnecessary and causing weird backwards driving
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
+			
+			isBraked = false;
+			prevTwoTriggerStates = false;			
 		}
 		
 		if(taskStatus == STATUS_AUTO) {
@@ -60,27 +49,25 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			}
 						
 			bool isQuickTurn = global->PrimaryGetLeftBumper(); 
-			bool isHighGear = global->PrimaryGetLeftTrigger();
 			
-			if(isHighGear){
-				highGear->Set(false);
-				lowGear->Set(true);
-			} else {
-				highGear->Set(true);
-				lowGear->Set(false);
+			if(global->PrimaryGetLeftTrigger() && global->PrimaryGetRightTrigger() && !prevTwoTriggerStates ) {
+				if(isBraked) {
+					isBraked = false;
+					brakeOff->Set(true);
+					brakeNow->Set(false);
+				} else {
+					isBraked = true;
+					brakeOff->Set(false);
+					brakeNow->Set(true);
+				}
 			}
-			
+						
 			float linear_power = throttle;
 			
 			double wheelNonLinearity;
 			
-			if(isHighGear) {
-				wheelNonLinearity = global->ReadCSV("TURN_NONLIN_HIGH");
-				} else {
-				wheelNonLinearity = global->ReadCSV("TURN_NONLIN_LOW");
-				wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
-			}
-			
+			wheelNonLinearity = global->ReadCSV("TURN_NONLIN_LOW");
+			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);	
 			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
 			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
 			
@@ -89,14 +76,10 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			
 			float angular_power;
 			
-			if (isHighGear) {
-				sensitivity = global->ReadCSV("SENSE_HIGH");
-			} else {
-				sensitivity = global->ReadCSV("SENSE_LOW");
+			sensitivity = global->ReadCSV("SENSE_LOW");
 				
-				if (fabs(throttle) > global->ReadCSV("SENSE_CUTTOFF")) {
-					sensitivity = 1 - (1 - sensitivity) / fabs(throttle);
-				}
+			if (fabs(throttle) > global->ReadCSV("SENSE_CUTTOFF")) {
+				sensitivity = 1 - (1 - sensitivity) / fabs(throttle);
 			}
 			
 			//quickturn!
@@ -128,6 +111,8 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			
 			vicLeft->Set(global->LinearizeVictor(left_pwm));
 			vicRight->Set(global->LinearizeVictor(-right_pwm));
+			
+			prevTwoTriggerStates = global->PrimaryGetLeftTrigger() && global->PrimaryGetRightTrigger();
 		}
 
 		SwapAndWait();

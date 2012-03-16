@@ -19,7 +19,7 @@ private:
 	
 	Task2415 *drive, *intake;
 	
-	Timer *driveTimer;
+	Timer *waitTimer;
 
 public:
 	Autonomous(void);

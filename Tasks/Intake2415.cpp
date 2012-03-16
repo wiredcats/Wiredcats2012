@@ -3,8 +3,8 @@
 Intake2415::Intake2415() {
 	global = new Global();
 	
-	armUp = new Solenoid(4);
-	armDown = new Solenoid(3);
+	armUp = new Solenoid(3);
+	armDown = new Solenoid(4);
 	
 	backplateDisengage = new Solenoid(6);
 	backplateEngage = new Solenoid(5);
@@ -22,10 +22,7 @@ Intake2415::Intake2415() {
 int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main", taskName);
 	
-	bool prevXState = true;
-	bool isArmUp = false;
-	bool prevTrigState = false;
-	bool prevBumpState = false;
+	bool prevXState, prevOtherXState, isArmUp, prevTrigState, prevBumpState, intakeOn;
 	
 	while (keepTaskAlive) {
 		if(taskStatus == STATUS_DISABLED) {
@@ -37,9 +34,11 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			twoBallShoot->Reset();
 			
 			prevXState = true;
-			isArmUp = false;
+			isArmUp = true;
 			prevTrigState = false;
 			prevBumpState = false;
+			prevOtherXState = false;
+			intakeOn = true;
 		}
 		
 		if(taskStatus == STATUS_AUTO){
@@ -63,11 +62,32 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			}
 		}
 		
-		if (taskStatus == STATUS_TELEOP) {
-			if(global->PrimaryGetButtonY()) {
-				suction->Set(suction->kReverse); //I don't think this actually will work, we'll see
-			} else {
-				suction->Set(suction->kForward); //I should be able to just say kReverse...
+		if (taskStatus == STATUS_TELEOP) {			
+			if(intakeOn) {
+				suction->Set(suction->kForward);
+			}
+			
+			if(global->PrimaryGetButtonY() && intakeOn == true) {
+				suction->Set(suction->kReverse); 
+			} 
+			
+			if(global->SecondaryGetButtonX() && !prevOtherXState) { //Toggle structure
+				if(intakeOn) {
+					intakeOn = false;
+					suction->Set(suction->kOff);
+				} else {
+					intakeOn = true;
+					suction->Set(suction->kForward);
+				}
+			}	
+			
+			//Hold down
+			if(global->SecondaryGetRightBumper()){
+				backplateEngage->Set(true);
+				backplateDisengage->Set(false);
+			} else if(twoBallShoot->Get() == 0 && oneBallShoot->Get() == 0 ){
+				backplateEngage->Set(false);
+				backplateDisengage->Set(true);
 			}
 			
 			//Two Ball
@@ -108,8 +128,10 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 					armUp->Set(true);
 					armDown->Set(false);
 				}
-			}			
+			}	
+			
 			prevXState = global->PrimaryGetButtonX();
+			prevOtherXState = global->SecondaryGetButtonX();
 			prevTrigState = global->SecondaryGetLeftTrigger();
 			prevBumpState = global->SecondaryGetLeftBumper();
 		}

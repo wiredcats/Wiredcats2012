@@ -96,7 +96,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					}
 					break;
 				case MANUAL_CONTROL:
-					turret->SetPIDSpecific(-global->SecondaryGetLeftX() * 0.2);
+					turret->SetPIDSpecific( global->SecondaryGetLeftX() * 0.2);
 					turret->SetState(PID_SPECIFIC);
 					if(global->SecondaryGetDPadX() < 0) {
 						turret->SetState(MOVE_LEFT);

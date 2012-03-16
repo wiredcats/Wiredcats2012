@@ -1,9 +1,9 @@
 #include "Autonomous.h"
 
-Autonomous::Autonomous(void) {
+Autonomous2415::Autonomous2415(void) {
 	global = new Global();
 	
-	drive = Task2415::SearchForTask("drive2415");
+	turret = Task2415::SearchForTask("turret2415");
 	intake = Task2415::SearchForTask("intake2415");
 	
 	waitTimer = new Timer();
@@ -16,11 +16,12 @@ Autonomous::Autonomous(void) {
 	Start("auto2415");
 }
 
-int Autonomous::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
+int Autonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main", taskName);	
 	while (keepTaskAlive) {
 		if(taskStatus == STATUS_DISABLED){
 			global->ResetCSV();
+			turret->SetState(AUTO_FIRE);
 			waitTimer->Stop();
 			waitTimer->Reset();
 		}		
@@ -29,9 +30,9 @@ int Autonomous::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			switch(taskState) {
 			case START:
 				waitTimer->Start();
-				taskState = WAIT_FORWARD;
+				taskState = WAIT;
 				break;
-			case WAIT_FORWARD:
+			case WAIT:
 				if(waitTimer->Get() >= global->ReadCSV("AUTONOMOUS_WAIT_TIME") ) {
 					taskState = SHOOT;
 					waitTimer->Stop();

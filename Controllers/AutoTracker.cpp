@@ -34,12 +34,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
     int prevCentX, prevCentY;
     double integral = 0.0;
             
-    while (keepTaskAlive) {    	
-        Threshold threshold(0,255,0,255,(int)global->ReadCSV("LUMINANCE_LOW"),255);
-        ParticleFilterCriteria2 filter[] = {
-    			{IMAQ_MT_AREA, 0, global->ReadCSV("PARTICLE_AREA_UPPER_BOUND"), false, false}
-        };      
-        
+    while (keepTaskAlive) {    	        
         if(global->SecondaryGetButtonBack()) {
         	taskState = MANUAL_CONTROL;
         }
@@ -48,11 +43,22 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         	taskState = SEARCH_FOR_BEST;
         }        	
         
+        Threshold threshold(0,255,0,255,(int)global->ReadCSV("LUMINANCE_LOW"),255);
+        ParticleFilterCriteria2 filter[] = {
+    			{IMAQ_MT_AREA, 0, global->ReadCSV("PARTICLE_AREA_UPPER_BOUND"), false, false}
+        };      
+        
+		//////////////////////////////////////
+		// State: Disabled
+		//////////////////////////////////////		        
         if(taskStatus == STATUS_DISABLED) {
         	global->ResetCSV();
         	integral = 0.0;
         }
         		
+		//////////////////////////////////////
+		// State: Auto / Teleop
+		//////////////////////////////////////		
         if (taskStatus == STATUS_TELEOP || taskStatus == STATUS_AUTO) {
         	if(camera.IsFreshImage() && taskState != MANUAL_CONTROL) {
         		HSLimage = camera.GetImage();
@@ -70,6 +76,16 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         	}
         							
 			switch (taskState) {
+				case MANUAL_CONTROL:
+					turret->SetPIDSpecific( global->SecondaryGetLeftX() * 0.2);
+					turret->SetState(PID_SPECIFIC);
+					if(global->SecondaryGetDPadX() < 0) {
+						turret->SetState(MOVE_LEFT);
+					}
+					if(global->SecondaryGetDPadX() > 0){
+						turret->SetState(MOVE_RIGHT);
+					}
+					break;
 				case SEARCH_FOR_BEST:	     					
 				    turret->SetState(WAIT_FOR_INPUT);
 					int targetHeight;
@@ -93,16 +109,6 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 							//TODO: Closest in area???
 							printf("Closest:(%d,%d)    SideRatio:%g    AreaRatio:%g\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest),AreaRatio(ratioBest));
 						}
-					}
-					break;
-				case MANUAL_CONTROL:
-					turret->SetPIDSpecific( global->SecondaryGetLeftX() * 0.2);
-					turret->SetState(PID_SPECIFIC);
-					if(global->SecondaryGetDPadX() < 0) {
-						turret->SetState(MOVE_LEFT);
-					}
-					if(global->SecondaryGetDPadX() > 0){
-						turret->SetState(MOVE_RIGHT);
 					}
 					break;
 				case LOCK_AND_FOLLOW:

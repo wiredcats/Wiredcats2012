@@ -1,5 +1,11 @@
 #include "Turret2415.h"
 
+//IMPORTANT: 
+//For speed PID loop, you can't send negative voltage through the motor
+//This is a modified loop to take this into consideration
+//Also, note that the I constant acts like P
+//and the P constant acts like D
+
 Turret2415::Turret2415() {
 	global = new Global();
 	
@@ -23,14 +29,21 @@ Turret2415::Turret2415() {
 int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
-	bool prevTrigState, isSixty;
+	bool prevTrigState, prevAState, prevBState, prevYState;
+	bool isSixty;
 	double power, integral;
 
-	while (keepTaskAlive) {				
+	while (keepTaskAlive) {
+		//////////////////////////////////////
+		// State: Disabled
+		//////////////////////////////////////		
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
 			
 			prevTrigState = true;
+			prevAState = true;
+			prevBState = true;
+			prevYState = true;
 			isSixty = false;
 			
 			fortyFive->Set(true);
@@ -43,9 +56,44 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			wheelEncoder->Reset();
 			wheelEncoder->Start();			
 		}
-		if (taskStatus == STATUS_AUTO || taskStatus == STATUS_TELEOP) {
-			
+		
+		//////////////////////////////////////
+		// State: Autonomous
+		//////////////////////////////////////		
+		if(taskStatus == STATUS_AUTO){
+			switch(taskState){
+			case AUTO_FIRE:
+				double current = wheelEncoder->GetRate();
+	//			printf("Encoder: %g\n",current);
+				double error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
+				
+				integral+=error;
+					
+				double kp = global->ReadCSV("KP_FLYWHEEL");
+				double ki = global->ReadCSV("KI_FLYWHEEL");
+				
+				double power = kp * error + ki * integral;
+				
+	//			printf("Error: %g, Power:%g\n",error,power);					
+				if(power > 0) {
+					vicWheel->Set(power);		
+				} else {
+					vicWheel->Set(0.1);
+				}
+				break;
+			default:
+				break;
+			}			
+		}
+		
+		//////////////////////////////////////
+		// State: Teleop
+		//////////////////////////////////////				
+		if (taskStatus == STATUS_TELEOP) {
 //			printf("Pot: %g\n",pot->GetVoltage());			
+			
+			// Hood control //
+			
 			if(global->SecondaryGetRightTrigger() && !prevTrigState) {
 				if(isSixty){
 					isSixty = false;
@@ -59,16 +107,23 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			}
 			prevTrigState = global->SecondaryGetRightTrigger();
 			
-			//TODO: Do the weird wheel latency thing that Hailey wants (???)
+			// PID LOOP OF AWESOMENESS //
 			
-			//IMPORTANT: 
-			//For speed PID loop, you can't send negative voltage through the motor
-			//This is a modified loop to take this into consideration
-			//Also, note that the I constant acts like P
-			//and the P constant acts like D
+			double goal;
+			
+			if(global->SecondaryGetButtonA() && !prevAState){
+				goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
+			}
+			if(global->SecondaryGetButtonB() && !prevBState){
+				goal = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED");
+			}
+			if(global->SecondaryGetButtonY() && !prevYState){
+//				goal = global->ReadCSV("");
+			}
+			
 			double current = wheelEncoder->GetRate();
 //			printf("Encoder: %g\n",current);
-			double error = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED") - current;
+			double error = goal - current;
 			
 			integral+=error;
 				
@@ -84,40 +139,30 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				vicWheel->Set(0.1);
 			}
 			
+			// Turret movement //
+			
 			switch (taskState) {
 				case WAIT_FOR_INPUT: 
 					vicRotate->Set(0.0); 
 					break;
 				case MOVE_LEFT:
 					vicRotate->Set(global->ReadCSV("TURRET_SPEED"));
-//					if(pot->GetVoltage() <= LEFT_LIMIT) {
-//						vicRotate->Set(0.0);
-//						printf("Left Limit hit\n");
-//					}
 					break;
 				case MOVE_RIGHT:
 					vicRotate->Set(-(global->ReadCSV("TURRET_SPEED")));
-//					if(pot->GetVoltage() >= RIGHT_LIMIT) {
-//						vicRotate->Set(0.0);
-//						printf("Right Limit hit\n");
-//					}
 					break;
 				case PID_SPECIFIC:
 					vicRotate->Set(PIDSpecific);
-//					if(pot->GetVoltage() >= RIGHT_LIMIT && PIDSpecific > 0) {
-//						vicRotate->Set(0.0);
-//						printf("Right Limit hit\n");
-//					}
-//					if(pot->GetVoltage() <= LEFT_LIMIT && PIDSpecific < 0) {
-//						vicRotate->Set(0.0);
-//						printf("Left Limit hit\n");
-//					}
 					break;
 				default:
 					vicRotate->Set(0.0);
 					vicWheel->Set(0.0);
 					break;
 			}
+			
+			prevAState = global->SecondaryGetButtonA();
+			prevBState = global->SecondaryGetButtonB();
+			prevYState = global->SecondaryGetButtonY();
 		}
 		SwapAndWait();
 	}

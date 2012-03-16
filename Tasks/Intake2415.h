@@ -12,8 +12,7 @@ class Intake2415 : public Task2415 {
 private:
 	Global *global;
 	Solenoid *armUp, *armDown, *backplateEngage, *backplateDisengage;
-	Relay *suction;
-	
+	Relay *suction;	
 	Timer *oneBallShoot, *twoBallShoot;
 
 public:

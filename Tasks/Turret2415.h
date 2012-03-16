@@ -11,6 +11,8 @@
 #define MOVE_RIGHT (30)
 #define PID_SPECIFIC (40)
 
+#define AUTO_FIRE (7)
+
 //TODO: Put this into the text document
 //We will end up having 2 CSV for each robot
 const double LEFT_LIMIT = 1.88;

@@ -19,7 +19,11 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 	
 	bool isBraked, prevTwoTriggerStates;
 	
-	while (keepTaskAlive) { //Deleted all "negative inertia" because unnecessary and causing weird backwards driving
+	while (keepTaskAlive) { 
+		
+		//////////////////////////////////////
+		// State: Disabled
+		//////////////////////////////////////		
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
 			
@@ -27,6 +31,9 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			prevTwoTriggerStates = false;			
 		}
 		
+		//////////////////////////////////////
+		// State: Autonomous
+		//////////////////////////////////////		
 		if(taskStatus == STATUS_AUTO) {
 			switch(taskState){
 			case FORWARD:
@@ -40,6 +47,9 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			}
 		}
 		
+		//////////////////////////////////////
+		// State: Teleop
+		//////////////////////////////////////		
 		if (taskStatus == STATUS_TELEOP) {			
 			double throttle = -global->PrimaryGetLeftY();
 			double wheel = global->PrimaryGetRightX();
@@ -50,6 +60,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 						
 			bool isQuickTurn = global->PrimaryGetLeftBumper(); 
 			
+			//Toggle the brakes
 			if(global->PrimaryGetLeftTrigger() && global->PrimaryGetRightTrigger() && !prevTwoTriggerStates ) {
 				if(isBraked) {
 					isBraked = false;
@@ -61,6 +72,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 					brakeNow->Set(true);
 				}
 			}
+			prevTwoTriggerStates = global->PrimaryGetLeftTrigger() && global->PrimaryGetRightTrigger();
 						
 			float linear_power = throttle;
 			
@@ -72,16 +84,14 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
 			
 			double left_pwm, right_pwm, overPower;
-			float sensitivity = 1.7;
+			float sensitivity = sensitivity = global->ReadCSV("SENSE_LOW");
 			
-			float angular_power;
-			
-			sensitivity = global->ReadCSV("SENSE_LOW");
-				
 			if (fabs(throttle) > global->ReadCSV("SENSE_CUTTOFF")) {
 				sensitivity = 1 - (1 - sensitivity) / fabs(throttle);
 			}
 			
+			float angular_power;
+				
 			//quickturn!
 			if (isQuickTurn) {
 				overPower = 1.0;
@@ -89,7 +99,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 				angular_power = wheel;
 			} else {
 				overPower = 0.0;
-				angular_power = throttle * wheel * sensitivity; //Unabsolute valued this so that the turns wouldn't be backwards
+				angular_power = throttle * wheel * sensitivity; 
 			}
 			
 			left_pwm = linear_power + angular_power;
@@ -111,10 +121,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			
 			vicLeft->Set(global->LinearizeVictor(left_pwm));
 			vicRight->Set(global->LinearizeVictor(-right_pwm));
-			
-			prevTwoTriggerStates = global->PrimaryGetLeftTrigger() && global->PrimaryGetRightTrigger();
 		}
-
 		SwapAndWait();
 	}
 

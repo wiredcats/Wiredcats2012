@@ -22,9 +22,13 @@ Intake2415::Intake2415() {
 int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main", taskName);
 	
-	bool prevXState, prevOtherXState, isArmUp, prevTrigState, prevBumpState, intakeOn;
+	bool prevXState, prevOtherXState, prevTrigState, prevBumpState;
+	bool isArmUp, intakeOn;
 	
 	while (keepTaskAlive) {
+		//////////////////////////////////////
+		// State: Disabled
+		//////////////////////////////////////		
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
 			
@@ -41,6 +45,9 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			intakeOn = true;
 		}
 		
+		//////////////////////////////////////
+		// State: Autonomous
+		//////////////////////////////////////		
 		if(taskStatus == STATUS_AUTO){
 			switch(taskState) {
 			case WAIT_FOR_INPUT:
@@ -62,7 +69,12 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			}
 		}
 		
+		//////////////////////////////////////
+		// State: Teleop
+		//////////////////////////////////////		
 		if (taskStatus == STATUS_TELEOP) {			
+			
+			// Rollers // 
 			if(intakeOn) {
 				suction->Set(suction->kForward);
 			}
@@ -80,6 +92,8 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 					suction->Set(suction->kForward);
 				}
 			}	
+			
+			// Shooting //
 			
 			//Hold down
 			if(global->SecondaryGetRightBumper()){
@@ -117,6 +131,8 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				oneBallShoot->Stop();
 				oneBallShoot->Reset();
 			}
+			
+			// Arm control //
 			
 			if(global->PrimaryGetButtonX() && !prevXState) { //Toggle structure
 				if(isArmUp) {

@@ -22,8 +22,8 @@ Intake2415::Intake2415() {
 int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main", taskName);
 	
-	bool prevXState, prevOtherXState, prevTrigState, prevBumpState;
-	bool isArmUp, intakeOn;
+	bool prevOtherXState, prevTrigState, prevBumpState;
+	bool intakeOn;
 	
 	while (keepTaskAlive) {
 		//////////////////////////////////////
@@ -37,12 +37,10 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			twoBallShoot->Stop();
 			twoBallShoot->Reset();
 			
-			prevXState = true;
-			isArmUp = true;
 			prevTrigState = false;
 			prevBumpState = false;
 			prevOtherXState = false;
-			intakeOn = true;
+			intakeOn = false;
 		}
 		
 		//////////////////////////////////////
@@ -128,19 +126,14 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			
 			// Arm control //
 			
-			if(global->PrimaryGetButtonX() && !prevXState) { //Toggle structure
-				if(isArmUp) {
-					isArmUp = false;
-					armUp->Set(false);
-					armDown->Set(true);
-				} else {
-					isArmUp = true;
-					armUp->Set(true);
-					armDown->Set(false);
-				}
+			if(global->PrimaryGetRightTrigger()) {
+				armUp->Set(false);
+				armDown->Set(true);
+			} else {
+				armUp->Set(true);
+				armDown->Set(false);
 			}	
 			
-			prevXState = global->PrimaryGetButtonX();
 			prevOtherXState = global->SecondaryGetButtonX();
 			prevTrigState = global->SecondaryGetLeftTrigger();
 			prevBumpState = global->SecondaryGetLeftBumper();

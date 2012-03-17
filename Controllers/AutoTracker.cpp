@@ -129,11 +129,16 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 								//PID Loop
 								//Recall that the origin is the top left corner
 								int currentCent = closest.center_mass_x;
-								int error = closest.imageWidth / 2 - currentCent;
+								double error = closest.imageWidth / 2 - currentCent;
 								double deriv = prevCentX - currentCent;
+								
+								//1771 suggests taking squareroot and multiplying by constant
+//								error = pow(fabs(error),0.5) * 0.666;
 								
 								integral+=error;
 									
+								//For non squarerooted error (Distance of center of target from middle of image)
+								// (0.0013, 0.000067, 0.0006)
 								double kp = global->ReadCSV("KP_TURRET");
 								double ki = global->ReadCSV("KI_TURRET");
 								double kd = global->ReadCSV("KD_TURRET");
@@ -143,7 +148,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 								// Compute the power to send to the arm.
 								double power = kp * error + ki * integral + kd * deriv;
 								
-								printf("Error: %d, Power:%g\n",error,power);
+								printf("Error: %g, Power:%g\n",error,power);
 								
 								turret->SetPIDSpecific(power);								
 								turret->SetState(PID_SPECIFIC);

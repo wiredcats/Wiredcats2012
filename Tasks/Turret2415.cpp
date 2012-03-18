@@ -19,8 +19,6 @@ Turret2415::Turret2415() {
 	//For real bot, (2,1...)
 	wheelEncoder = new Encoder(2,1,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
 
-	taskState = WAIT_FOR_INPUT;
-	
 	pot = new AnalogChannel(1,3);
 
 	Start("turret2415");
@@ -31,7 +29,9 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	
 	bool prevTrigState, prevAState, prevBState, prevYState;
 	bool isSixty;
-	double power, integral;
+	double power, integral, goal;
+	
+	PIDSpecific = 0.0;
 
 	while (keepTaskAlive) {
 		//////////////////////////////////////
@@ -51,6 +51,7 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			
 			power = 0.0;
 			integral = 0.0;
+			PIDSpecific = 0.0;
 			
 			wheelEncoder->Stop();
 			wheelEncoder->Reset();
@@ -85,17 +86,19 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////
 		// State: Teleop
 		//////////////////////////////////////				
-		if (taskStatus == STATUS_TELEOP) {
-//			printf("Pot: %g\n",pot->GetVoltage());			
+		if (taskStatus == STATUS_TELEOP) {			
 			
-			fortyFive->Set(false);
-			sixty->Set(true);	
+			if(global->SecondaryGetRightTrigger() && !prevTrigState){
+				fortyFive->Set(true);
+				sixty->Set(false);	
+				goal = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED");
+			} else {
+				fortyFive->Set(false);
+				sixty->Set(true);	
+				goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
+			}
 			
-			// PID LOOP OF AWESOMENESS //
-			
-			double goal;
-			goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
-			
+			// PID LOOP OF AWESOMENESS //			
 			double current = wheelEncoder->GetRate();
 //			printf("Encoder: %g\n",current);
 			double error = goal - current;
@@ -114,30 +117,13 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				vicWheel->Set(0.1);
 			}
 			
-			// Turret movement //
-			
-			switch (taskState) {
-				case WAIT_FOR_INPUT: 
-					vicRotate->Set(0.0); 
-					break;
-				case MOVE_LEFT:
-					vicRotate->Set(global->ReadCSV("TURRET_SPEED"));
-					break;
-				case MOVE_RIGHT:
-					vicRotate->Set(-(global->ReadCSV("TURRET_SPEED")));
-					break;
-				case PID_SPECIFIC:
-					vicRotate->Set(PIDSpecific);
-					break;
-				default:
-					vicRotate->Set(0.0);
-					vicWheel->Set(0.0);
-					break;
-			}
+			// Turret movement //			
+			vicRotate->Set(PIDSpecific);
 			
 			prevAState = global->SecondaryGetButtonA();
 			prevBState = global->SecondaryGetButtonB();
 			prevYState = global->SecondaryGetButtonY();
+			prevTrigState = global->SecondaryGetRightTrigger();
 		}
 		SwapAndWait();
 	}

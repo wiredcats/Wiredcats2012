@@ -27,8 +27,6 @@ void _GLOBAL__I__ZN9CSVReaderC2ERKSs();
 
 void _GLOBAL__I__ZN9Drive2415C2Ev();
 
-void _GLOBAL__I__ZN9Shoot2415C2Ev();
-
 void _GLOBAL__I_drive();
 
 void _GLOBAL__I__ZN12PrintCommandC2EPKc();
@@ -62,7 +60,6 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN8Task2415C2Ev,
     _GLOBAL__I__ZN9CSVReaderC2ERKSs,
     _GLOBAL__I__ZN9Drive2415C2Ev,
-    _GLOBAL__I__ZN9Shoot2415C2Ev,
     _GLOBAL__I_drive,
     _GLOBAL__I__ZN12PrintCommandC2EPKc,
     _GLOBAL__I__ZN9Scheduler9_instanceE,
@@ -96,8 +93,6 @@ void _GLOBAL__D__ZN9CSVReaderC2ERKSs();
 
 void _GLOBAL__D__ZN9Drive2415C2Ev();
 
-void _GLOBAL__D__ZN9Shoot2415C2Ev();
-
 void _GLOBAL__D_drive();
 
 void _GLOBAL__D__ZN9Scheduler9_instanceE();
@@ -127,7 +122,6 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN8Task2415C2Ev,
     _GLOBAL__D__ZN9CSVReaderC2ERKSs,
     _GLOBAL__D__ZN9Drive2415C2Ev,
-    _GLOBAL__D__ZN9Shoot2415C2Ev,
     _GLOBAL__D_drive,
     _GLOBAL__D__ZN9Scheduler9_instanceE,
     _GLOBAL__D_wpi_error_s_ModuleIndexOutOfRange,

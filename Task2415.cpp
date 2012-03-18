@@ -65,7 +65,9 @@ void Task2415::SetState(int state) {
 	taskStateComplete = false;
 }
 
-void Task2415::SetPIDSpecific(double pwm) {
+int Task2415::GetState(void) {	return(taskState);	}
+
+void Task2415::SetPWMSpecific(double pwm) {
 	if (pwm > 1.0) pwm = 1.0;
 	if (pwm < -1.0) pwm = -1.0;
 	PIDSpecific = pwm;

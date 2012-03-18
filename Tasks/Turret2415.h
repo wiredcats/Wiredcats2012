@@ -6,12 +6,10 @@
 #include "../Global.h"
 #include <math.h>
 
-#define WAIT_FOR_INPUT (10)
-#define MOVE_LEFT (20)
-#define MOVE_RIGHT (30)
-#define PID_SPECIFIC (40)
-
 #define AUTO_FIRE (7)
+
+#define FENDER_SHOOT (10)
+#define KEY_SHOOT (15)
 
 //TODO: Put this into the text document
 //We will end up having 2 CSV for each robot

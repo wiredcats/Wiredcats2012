@@ -22,7 +22,7 @@ int Autonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8,
 		if(taskStatus == STATUS_DISABLED){
 			global->ResetCSV();
 			turret->SetState(AUTO_FIRE);
-			intake->SetState(WAIT_FOR_INPUT);
+			intake->SetState(WAIT_FOR_AUTO_INPUT);
 			waitTimer->Stop();
 			waitTimer->Reset();
 		}		

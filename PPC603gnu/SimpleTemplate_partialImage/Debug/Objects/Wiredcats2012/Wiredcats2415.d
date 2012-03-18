@@ -336,8 +336,7 @@ SimpleTemplate_partialImage/Debug/Objects/Wiredcats2012/Wiredcats2415.o:  \
   C:/windriver/workspace/Wiredcats2012/Controllers/AutoTracker.h \
   C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h \
   C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Intake2415.h \
-  C:/windriver/workspace/Wiredcats2012/Controllers/Autonomous.h \
-  C:/windriver/workspace/Wiredcats2012/Controllers/ShootController.h
+  C:/windriver/workspace/Wiredcats2012/Controllers/Autonomous.h
 
 C:/windriver/workspace/Wiredcats2012/Wiredcats2415.h:
 
@@ -1012,5 +1011,3 @@ C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Turret2415.h:
 C:/windriver/workspace/Wiredcats2012/Controllers/../Tasks/Intake2415.h:
 
 C:/windriver/workspace/Wiredcats2012/Controllers/Autonomous.h:
-
-C:/windriver/workspace/Wiredcats2012/Controllers/ShootController.h:

@@ -77,17 +77,16 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         							
 			switch (taskState) {
 				case MANUAL_CONTROL:
-					turret->SetPIDSpecific(-global->SecondaryGetLeftX() * 0.2);
-					turret->SetState(PID_SPECIFIC);
-					if(global->SecondaryGetDPadX() < 0) {
-						turret->SetState(MOVE_LEFT);
+					turret->SetPWMSpecific(-global->SecondaryGetLeftX() * 0.2);
+					if(global->SecondaryGetDPadX() < 0) { //Move Left
+						turret->SetPWMSpecific(global->ReadCSV("TURRET_SPEED"));
 					}
-					if(global->SecondaryGetDPadX() > 0){
-						turret->SetState(MOVE_RIGHT);
+					if(global->SecondaryGetDPadX() > 0){ //Move right
+						turret->SetPWMSpecific(-global->ReadCSV("TURRET_SPEED"));
 					}
 					break;
 				case SEARCH_FOR_BEST:	     					
-				    turret->SetState(WAIT_FOR_INPUT);
+				    turret->SetPWMSpecific(0.0);
 					int targetHeight;
 					targetHeight = 0;
 					
@@ -150,8 +149,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 								
 								printf("Error: %g, Power:%g\n",error,power);
 								
-								turret->SetPIDSpecific(power);								
-								turret->SetState(PID_SPECIFIC);
+								turret->SetPWMSpecific(power);			
 																
 								prevCentX = closest.center_mass_x;
 								prevCentY = closest.center_mass_y;
@@ -162,7 +160,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					break;
 				default:
 					taskState = SEARCH_FOR_BEST;
-					turret->SetState(WAIT_FOR_INPUT);
+					turret->SetPWMSpecific(0.0);
 					break;
 			}
 		}

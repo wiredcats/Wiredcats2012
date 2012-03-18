@@ -40,7 +40,8 @@ public:
 	void SetIndividualStatus(TASK_STATUS ts);
 
 	void SetState(int state);
-	void SetPIDSpecific(double pwm);
+	int GetState(void);
+	void SetPWMSpecific(double pwm);
 	
 	bool StateComplete();
 

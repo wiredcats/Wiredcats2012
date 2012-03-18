@@ -8,6 +8,8 @@ Drive2415::Drive2415() {
 	
 	brakeOff = new Solenoid(8);
 	brakeNow = new Solenoid(7);
+	
+	stupidTimer = new Timer();
 
 	//taskState = NORMAL_JOYSTICK;
 
@@ -18,9 +20,9 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 	printf("entering %s main\n", taskName);
 	
 	bool isBraked, prevTrigState;
+	bool firstTime = true;
 	
-	while (keepTaskAlive) { 
-		
+	while (keepTaskAlive) { 		
 		//////////////////////////////////////
 		// State: Disabled
 		//////////////////////////////////////		
@@ -29,6 +31,9 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			
 			isBraked = false;
 			prevTrigState = false;			
+			stupidTimer->Stop();
+			stupidTimer->Reset();
+			firstTime = true;
 		}
 		
 		//////////////////////////////////////
@@ -51,7 +56,11 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 		// State: Teleop
 		//////////////////////////////////////		
 		if (taskStatus == STATUS_TELEOP) {			
-			//TODO: NEED TO TUNE THESE BETTER
+			if(firstTime){
+				stupidTimer->Start();
+				firstTime = false;
+			}
+			
 			double throttle = -global->PrimaryGetLeftY();
 			double wheel = global->PrimaryGetRightX();
 			
@@ -62,7 +71,8 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			bool isQuickTurn = global->PrimaryGetLeftBumper(); 
 			
 			//Toggle the brakes
-			if(global->PrimaryGetLeftTrigger() && !prevTrigState ) {
+			if(global->PrimaryGetLeftTrigger() && !prevTrigState && stupidTimer->Get() >= 90) {
+				stupidTimer->Stop();
 				if(isBraked) {
 					isBraked = false;
 					brakeOff->Set(true);

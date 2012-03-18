@@ -14,7 +14,7 @@ Intake2415::Intake2415() {
 	oneBallShoot = new Timer();
 	twoBallShoot = new Timer();
 	
-	taskState = WAIT_FOR_INPUT;
+	taskState = DISENGAGE;
 
 	Start("intake2415");
 }
@@ -23,7 +23,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	printf("entering %s main", taskName);
 	
 	bool prevOtherXState, prevTrigState, prevBumpState;
-	bool intakeOn;
+	bool intakeOn, willShoot;
 	
 	while (keepTaskAlive) {
 		//////////////////////////////////////
@@ -41,6 +41,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			prevBumpState = false;
 			prevOtherXState = false;
 			intakeOn = false;
+			willShoot = false;
 		}
 		
 		//////////////////////////////////////
@@ -48,7 +49,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////		
 		if(taskStatus == STATUS_AUTO){
 			switch(taskState) {
-			case WAIT_FOR_INPUT:
+			case WAIT_FOR_AUTO_INPUT:
 				suction->Set(suction->kOff);
 				break;
 			case AUTONOMOUS_SHOOT:			
@@ -64,8 +65,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////
 		// State: Teleop
 		//////////////////////////////////////		
-		if (taskStatus == STATUS_TELEOP) {			
-			
+		if (taskStatus == STATUS_TELEOP) {	
 			// Rollers // 
 			if(intakeOn) {
 				suction->Set(suction->kForward);
@@ -75,6 +75,37 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				suction->Set(suction->kReverse); 
 			} 
 			
+			//Hold down
+			if(global->SecondaryGetRightBumper()){
+				willShoot = true;
+			} else if(twoBallShoot->Get() == 0 && oneBallShoot->Get() == 0 ){
+				willShoot = false;
+			}
+			
+			//Two Ball
+			if(global->SecondaryGetLeftTrigger() && !prevTrigState) {
+				willShoot = true;
+				twoBallShoot->Start();
+			} 
+			
+			if(twoBallShoot->Get() >= global->ReadCSV("TWO_BALL_SHOOT")) {
+				willShoot = false;
+				twoBallShoot->Stop();
+				twoBallShoot->Reset();
+			}
+			
+			//One ball
+			if(global->SecondaryGetLeftBumper() && !prevBumpState) { 
+				willShoot = true;
+				oneBallShoot->Start();
+			} 
+			
+			if(oneBallShoot->Get() >= global->ReadCSV("ONE_BALL_SHOOT")) {
+				willShoot = false;
+				oneBallShoot->Stop();
+				oneBallShoot->Reset();
+			}
+
 			if(global->SecondaryGetButtonX() && !prevOtherXState) { //Toggle structure
 				if(intakeOn) {
 					intakeOn = false;
@@ -85,47 +116,15 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				}
 			}	
 			
-			// Shooting //
-			
-			//Hold down
-			if(global->SecondaryGetRightBumper()){
+			if(willShoot){
 				backplateEngage->Set(true);
 				backplateDisengage->Set(false);
-			} else if(twoBallShoot->Get() == 0 && oneBallShoot->Get() == 0 ){
+			}else {
 				backplateEngage->Set(false);
-				backplateDisengage->Set(true);
+				backplateDisengage->Set(true);				
 			}
-			
-			//Two Ball
-			if(global->SecondaryGetLeftTrigger() && !prevTrigState) {
-				backplateEngage->Set(true);
-				backplateDisengage->Set(false);
-				twoBallShoot->Start();
-			} 
-			
-			if(twoBallShoot->Get() >= global->ReadCSV("TWO_BALL_SHOOT")) {
-				backplateEngage->Set(false);
-				backplateDisengage->Set(true);
-				twoBallShoot->Stop();
-				twoBallShoot->Reset();
-			}
-			
-			//One ball
-			if(global->SecondaryGetLeftBumper() && !prevBumpState) { 
-				backplateEngage->Set(true);
-				backplateDisengage->Set(false);
-				oneBallShoot->Start();
-			} 
-			
-			if(oneBallShoot->Get() >= global->ReadCSV("ONE_BALL_SHOOT")) {
-				backplateEngage->Set(false);
-				backplateDisengage->Set(true);
-				oneBallShoot->Stop();
-				oneBallShoot->Reset();
-			}
-			
+				
 			// Arm control //
-			
 			if(global->PrimaryGetRightTrigger()) {
 				armUp->Set(false);
 				armDown->Set(true);

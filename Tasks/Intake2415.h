@@ -5,8 +5,12 @@
 #include "../Task2415.h"
 #include "../Global.h"
 
-#define WAIT_FOR_INPUT (10)
 #define AUTONOMOUS_SHOOT (7)
+#define WAIT_FOR_AUTO_INPUT (17)
+
+#define DISENGAGE (10)
+#define ENGAGE (20)
+#define WAIT_FOR_INPUT (30)
 
 class Intake2415 : public Task2415 {
 private:

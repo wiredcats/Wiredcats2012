@@ -20,6 +20,8 @@ private:
 	Victor *vicLeft, *vicRight;
 	
 	Solenoid *brakeOff, *brakeNow;
+	
+	Timer *stupidTimer;
 
 public:
 	Drive2415(void);

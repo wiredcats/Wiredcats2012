@@ -9,6 +9,7 @@ Task2415::Task2415(void) {
 	taskStateComplete = false;
 	
 	PIDSpecific = 0.0;
+	value = 0.0;
 
 	isAwake = false;
 	keepTaskAlive = true;
@@ -71,6 +72,10 @@ void Task2415::SetPWMSpecific(double pwm) {
 	if (pwm > 1.0) pwm = 1.0;
 	if (pwm < -1.0) pwm = -1.0;
 	PIDSpecific = pwm;
+}
+
+double Task2415::GetValue(void){
+	return(value);
 }
 
 bool Task2415::StateComplete() {

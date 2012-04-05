@@ -6,16 +6,12 @@ Intake2415::Intake2415() {
 	armUp = new Solenoid(3);
 	armDown = new Solenoid(4);
 	
-	backplateDisengage = new Solenoid(6);
-	backplateEngage = new Solenoid(5);
+	towerSuction = new Relay(2);
+	feed = new Relay(3);
 	
-	suction = new Relay(2);
+	ballSensor = new DigitalInput(9);
+	towerEncoder = new Encoder(12,13,false,(CounterBase::EncodingType)2);
 	
-	oneBallShoot = new Timer();
-	twoBallShoot = new Timer();
-	
-	taskState = DISENGAGE;
-
 	Start("intake2415");
 }
 
@@ -23,7 +19,6 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	printf("entering %s main", taskName);
 	
 	bool prevOtherXState, prevTrigState, prevBumpState;
-	bool intakeOn, willShoot;
 	
 	while (keepTaskAlive) {
 		//////////////////////////////////////
@@ -31,17 +26,12 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////		
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
-			
-			oneBallShoot->Stop();
-			oneBallShoot->Reset();
-			twoBallShoot->Stop();
-			twoBallShoot->Reset();
-			
+						
 			prevTrigState = false;
 			prevBumpState = false;
 			prevOtherXState = false;
-			intakeOn = false;
-			willShoot = false;
+			towerEncoder->Stop();
+			towerEncoder->Reset();
 		}
 		
 		//////////////////////////////////////
@@ -50,12 +40,10 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		if(taskStatus == STATUS_AUTO){
 			switch(taskState) {
 			case WAIT_FOR_AUTO_INPUT:
-				suction->Set(suction->kOff);
+				towerSuction->Set(towerSuction->kOff);
 				break;
-			case AUTONOMOUS_SHOOT:			
-				suction->Set(suction->kForward);
-				backplateEngage->Set(true);
-				backplateDisengage->Set(false);
+			case SHOOT:			
+				towerSuction->Set(towerSuction->kReverse);
 				break;
 			default:
 				break;
@@ -66,72 +54,47 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		// State: Teleop
 		//////////////////////////////////////		
 		if (taskStatus == STATUS_TELEOP) {	
-			// Rollers // 
-			if(intakeOn) {
-				suction->Set(suction->kForward);
-			}
-			
-			if(global->SecondaryGetButtonY() && intakeOn == true) {
-				suction->Set(suction->kReverse); 
-			} 
-			
-			//Hold down
-			if(global->SecondaryGetRightBumper()){
-				willShoot = true;
-			} else if(twoBallShoot->Get() == 0 && oneBallShoot->Get() == 0 ){
-				willShoot = false;
-			}
-			
-			//Two Ball
-			if(global->SecondaryGetLeftTrigger() && !prevTrigState) {
-				willShoot = true;
-				twoBallShoot->Start();
-			} 
-			
-			if(twoBallShoot->Get() >= global->ReadCSV("TWO_BALL_SHOOT")) {
-				willShoot = false;
-				twoBallShoot->Stop();
-				twoBallShoot->Reset();
-			}
-			
-			//One ball
-			if(global->SecondaryGetLeftBumper() && !prevBumpState) { 
-				willShoot = true;
-				oneBallShoot->Start();
-			} 
-			
-			if(oneBallShoot->Get() >= global->ReadCSV("ONE_BALL_SHOOT")) {
-				willShoot = false;
-				oneBallShoot->Stop();
-				oneBallShoot->Reset();
-			}
-
-			if(global->SecondaryGetButtonX() && !prevOtherXState) { //Toggle structure
-				if(intakeOn) {
-					intakeOn = false;
-					suction->Set(suction->kOff);
-				} else {
-					intakeOn = true;
-					suction->Set(suction->kForward);
-				}
-			}	
-			
-			if(willShoot){
-				backplateEngage->Set(true);
-				backplateDisengage->Set(false);
-			}else {
-				backplateEngage->Set(false);
-				backplateDisengage->Set(true);				
-			}
-				
 			// Arm control //
-			if(global->PrimaryGetRightTrigger()) {
+			if(global->PrimaryGetLeftTrigger()) {
 				armUp->Set(false);
 				armDown->Set(true);
 			} else {
 				armUp->Set(true);
 				armDown->Set(false);
 			}	
+			
+			if(global->PrimaryGetLeftBumper()){
+				feed->Set(feed->kReverse);
+			} else {
+				feed->Set(feed->kOff);
+			}
+			
+//			printf("Tower Encoder: %d\n",towerEncoder->Get());			
+			
+			//Autoindexing:
+			//Once light sensor triggered, run tower for set amount of encoder clicks
+			//1 if it has nothing, 0 if it has a ball
+			if(!ballSensor->Get()){
+				towerEncoder->Start();
+				towerSuction->Set(towerSuction->kReverse);				
+			} else {
+				towerSuction->Set(towerSuction->kOff);
+			}
+			
+			if(towerEncoder->Get() >= CLICKS_INDEX) {
+				towerEncoder->Stop();
+				towerEncoder->Reset();
+				towerSuction->Set(towerSuction->kOff);
+			}
+			
+			if(taskState == SHOOT){
+				towerSuction->Set(towerSuction->kReverse);
+			}
+			
+			// Backdrive the tower //
+			if(global->SecondaryGetButtonY()) {
+				towerSuction->Set(towerSuction->kForward); 
+			} 
 			
 			prevOtherXState = global->SecondaryGetButtonX();
 			prevTrigState = global->SecondaryGetLeftTrigger();

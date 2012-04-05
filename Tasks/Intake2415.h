@@ -5,19 +5,21 @@
 #include "../Task2415.h"
 #include "../Global.h"
 
-#define AUTONOMOUS_SHOOT (7)
 #define WAIT_FOR_AUTO_INPUT (17)
 
-#define DISENGAGE (10)
-#define ENGAGE (20)
-#define WAIT_FOR_INPUT (30)
+#define WAIT_FOR_INPUT (10)
+#define SHOOT (30)
+
+const float CLICKS_INDEX = 150;
 
 class Intake2415 : public Task2415 {
 private:
 	Global *global;
-	Solenoid *armUp, *armDown, *backplateEngage, *backplateDisengage;
-	Relay *suction;	
-	Timer *oneBallShoot, *twoBallShoot;
+	Solenoid *armUp, *armDown;
+	Relay *towerSuction, *feed;
+	Timer *waitTimer;
+	DigitalInput *ballSensor;
+	Encoder *towerEncoder;
 
 public:
 	Intake2415(void);

@@ -10,7 +10,8 @@ AutoTracker2415::AutoTracker2415() {
 	turret = Task2415::SearchForTask("turret2415");
 	intake = Task2415::SearchForTask("intake2415");
 	
-	taskState = MANUAL_CONTROL;
+	led = new Relay(4);
+	turretEncoder = new Encoder(7,8,false,(CounterBase::EncodingType)0); 
 
 	Start("autotracker2415");
 }
@@ -31,8 +32,8 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
     ParticleAnalysisReport ratioBest;
     vector<ParticleAnalysisReport>* s_particles;
     
-    int prevCentX, prevCentY;
     double integral = 0.0;
+    int current, goal, error, prev, deriv;
             
     while (keepTaskAlive) {    	        
         if(global->SecondaryGetButtonBack()) {
@@ -54,13 +55,24 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         if(taskStatus == STATUS_DISABLED) {
         	global->ResetCSV();
         	integral = 0.0;
+        	turretEncoder->Stop();
+        	turretEncoder->Reset();
+        	turretEncoder->Start();
         }
         		
 		//////////////////////////////////////
 		// State: Auto / Teleop
 		//////////////////////////////////////		
-        if (taskStatus == STATUS_TELEOP || taskStatus == STATUS_AUTO) {
-        	if(camera.IsFreshImage() && taskState != MANUAL_CONTROL) {
+        if (taskStatus == STATUS_TELEOP || taskStatus == STATUS_AUTO) {  
+            if(global->SecondaryGetButtonBack()) {
+            	taskState = MANUAL_CONTROL;
+            }
+            
+            if(global->SecondaryGetButtonStart()) {
+            	taskState = SEARCH_FOR_BEST;
+            }        	
+        	
+        	if(camera.IsFreshImage() && taskState == SEARCH_FOR_BEST) {
         		HSLimage = camera.GetImage();
 				BWimage = HSLimage->ThresholdHSL(threshold);
 				imaqImage = BWimage->GetImaqImage();
@@ -77,6 +89,8 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
         							
 			switch (taskState) {
 				case MANUAL_CONTROL:
+					current = turretEncoder->Get();
+//					printf("Current Manual: %d\n ", current);
 					turret->SetPWMSpecific(-global->SecondaryGetLeftX() * 0.2);
 					if(global->SecondaryGetDPadX() < 0) { //Move Left
 						turret->SetPWMSpecific(global->ReadCSV("TURRET_SPEED"));
@@ -95,71 +109,58 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					
 					printf("Particles Found!: %d\n", s_particles->size());										
 					if(s_particles->size() > 0) {
+						//TODO: In order for us to track with more than one target,
+						//We will need to store an array of targets
+						FindRatioGood(s_particles);
 						ratioBest = FindRatioBest(s_particles);
 						if(fabs(SideRatio(ratioBest)- 4.0/3.0) <= global->ReadCSV("TARGET_MARGIN_OF_ERROR")) { //Ratio is not the only measurement, when tilted, can be as far off as 1
 							targetHeight = ratioBest.imageHeight - ratioBest.center_mass_y;
 							printf("Best:(%d,%d)    SideRatio:%g    Area:%g    AreaRatio:%g   Height:%d\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest), ratioBest.particleArea, AreaRatio(ratioBest), targetHeight);
+							current = turretEncoder->Get();
+							//6.783 pixels / degree 
+							//2.553 clicks / degree
+							// 2.553 / 6.783 = 0.3714
+							goal = (int) (current + 0.3717 *(ratioBest.imageWidth / 2 - ratioBest.center_mass_x));
+							prev = current;
+							printf("Current Found: %d         Goal: %d\n ", current, goal);
 							taskState = LOCK_AND_FOLLOW;
-							prevCentX = ratioBest.center_mass_x;
-							prevCentY = ratioBest.center_mass_y;
-						} else { //TODO: Find another method that isn't so concerned about ratio. Consistnently one target and stay lcoked on
-							//TODO: Write PID Loop that centers the loop on closest one?
-							//TODO: Or pick one where center of mass differ most from BB center of mass (most skew)? 
-							//TODO: Closest in area???
+						} else { //TODO: Find another method that isn't so concerned about ratio. Consistnently one target and stay lcoked on Write PID Loop that centers the loop on closest one? Or pick one where center of mass differ most from BB center of mass (most skew)? Closest in area???
 							printf("Closest:(%d,%d)    SideRatio:%g    AreaRatio:%g\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest),AreaRatio(ratioBest));
 						}
 					}
 					break;
 				case LOCK_AND_FOLLOW:
-					///From previous image
-					//Find current particle that is closest to center of mass
-					//to that particle
-					printf("\nLocked on - Particles found: %d\n", s_particles->size());
-					if(s_particles->size() > 0) {
-						ParticleAnalysisReport closest = SearchForCloseFit(s_particles, prevCentX, prevCentY);
-						printf("Previous: (%d,%d)  Current: (%d,%d)   Dist: %g\n",prevCentX, prevCentY, closest.center_mass_x, closest.center_mass_y, Distance(prevCentX, prevCentY, closest.center_mass_x, closest.center_mass_y));
-						if(Distance(prevCentX, prevCentY, closest.center_mass_x, closest.center_mass_y) > global->ReadCSV("TARGET_DIST_MARGIN")){
-							taskState = SEARCH_FOR_BEST;
-							printf("Stop locked\n");
-							} else {
-								printf("Continue locked\n");
-								taskState = LOCK_AND_FOLLOW;
-								
-								//PID Loop
-								//Recall that the origin is the top left corner
-								int currentCent = closest.center_mass_x;
-								double error = closest.imageWidth / 2 - currentCent;
-								double deriv = prevCentX - currentCent;
-								
-								//1771 suggests taking squareroot and multiplying by constant
-//								error = pow(fabs(error),0.5) * 0.666;
-								
-								integral+=error;
-									
-								//For non squarerooted error (Distance of center of target from middle of image)
-								// (0.0013, 0.000067, 0.0006)
-								double kp = global->ReadCSV("KP_TURRET");
-								double ki = global->ReadCSV("KI_TURRET");
-								double kd = global->ReadCSV("KD_TURRET");
-								
-								printf("PID: (%g, %g, %g)\n",kp,ki,kd);
-									
-								// Compute the power to send to the arm.
-								double power = kp * error + ki * integral + kd * deriv;
-								
-								printf("Error: %g, Power:%g\n",error,power);
-								
-								turret->SetPWMSpecific(power);			
-																
-								prevCentX = closest.center_mass_x;
-								prevCentY = closest.center_mass_y;
-								}
-						} else {
-							taskState = SEARCH_FOR_BEST;
-						}					
+					//Based on encoder now					
+					//PID Loop
+					//Recall that the origin is the top left corner
+					current = turretEncoder->Get();
+//					printf("Current Locked: %d\n ", current);
+					error = goal - current;
+					deriv = prev - current;
+										
+					integral+=error;
+					
+					double kp = global->ReadCSV("KP_TURRET");
+					double ki = global->ReadCSV("KI_TURRET");
+					double kd = global->ReadCSV("KD_TURRET");
+					
+					printf("PID: (%g, %g, %g)\n",kp,ki,kd);
+					
+					if(error != 0) {				
+						// Compute the power to send to the arm.
+						double power = kp * error + ki * integral + kd * deriv;
+						printf("Current: %d, Error: %d, Power:%g\n",current, error,power);						
+						turret->SetPWMSpecific(power);																	
+						prev = current;
+						taskState = LOCK_AND_FOLLOW;
+					} else {
+						printf("Current: %d, Goal: %d",current,goal);
+						taskState = MANUAL_CONTROL;
+					}
+					
 					break;
 				default:
-					taskState = SEARCH_FOR_BEST;
+					taskState = MANUAL_CONTROL;
 					turret->SetPWMSpecific(0.0);
 					break;
 			}
@@ -169,15 +170,36 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 	return 0;
 }
 
+void AutoTracker2415::FindRatioGood(vector<ParticleAnalysisReport>* vec){
+	int size = vec->size();
+	
+//	|| AreaRatio(vec->at(i)) <= global->ReadCSV("AREA_RATIO_LOWER_BOUND")
+	
+	for(int i = 0; i < size; i++) {
+//		printf("Target %d/%d: (%d,%d)   SideRatio: %g     Area: %g    AreaRatio:%g\n",i, size, vec->at(i).center_mass_x, vec->at(i).center_mass_y, SideRatio(vec->at(i)), vec->at(i).particleArea, AreaRatio(vec->at(i)));
+		if((fabs(SideRatio(vec->at(i)) - 4.0/3.0)) >= global->ReadCSV("TARGET_MARGIN_OF_ERROR")) {
+			if(size != 1) {
+				vec->erase(vec->begin() + i);
+				i--;
+			} else {
+				break;
+			}
+		}
+		size = vec->size();
+	}
+//	printf("\n\n");
+}
+
 ParticleAnalysisReport AutoTracker2415::FindRatioBest(vector<ParticleAnalysisReport>* vec){
 	int size = vec->size();
 	int best = 0;
 	
+//	printf("Target 0: (%d,%d)   SideRatio: %g     Area: %g    AreaRatio:%g\n", vec->at(best).center_mass_x, vec->at(best).center_mass_y, SideRatio(vec->at(best)), vec->at(best).particleArea, AreaRatio(vec->at(best)));
+	
 	for(int i = 1; i < size; i++) {
-		if((fabs(SideRatio(vec->at(best)) - 4.0/3.0)) >= (fabs(SideRatio(vec->at(i)) - 4.0/3.0))) {
-			if(AreaRatio(vec->at(i)) >= global->ReadCSV("AREA_RATIO_LOWER_BOUND")) {
-				best = i;
-			}
+//		printf("Target %d: (%d,%d)   SideRatio: %g     Area: %g    AreaRatio:%g\n",i, vec->at(i).center_mass_x, vec->at(i).center_mass_y, SideRatio(vec->at(i)), vec->at(i).particleArea, AreaRatio(vec->at(i)));
+		if(vec->at(i).center_mass_y < vec->at(best).center_mass_y) {
+			best = i;
 		}
 	}
 	return(vec->at(best));

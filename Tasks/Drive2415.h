@@ -10,6 +10,14 @@
 #define AUTOBALANCE (20)
 
 #define FORWARD (7)
+#define BACK (17)
+#define TURN_FORWARD_RIGHT (27)
+#define TURN_FORWARD_LEFT (37)
+#define TURN_BACKWARD_RIGHT (47)
+#define TURN_BACKWARD_LEFT (57)
+
+const float STRAIGHT_SPEED = 0.3;
+const float TURN_SPEED = 0.2;
 
 const float PI = 3.1415926;
 

@@ -6,8 +6,6 @@
 #include "../Global.h"
 #include <math.h>
 
-#define AUTO_FIRE (7)
-
 #define FENDER_SHOOT (10)
 #define KEY_SHOOT (15)
 

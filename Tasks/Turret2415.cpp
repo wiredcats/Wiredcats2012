@@ -17,7 +17,7 @@ Turret2415::Turret2415() {
 	
 	//For practice bot, (1,2...)
 	//For real bot, (2,1...)
-	wheelEncoder = new Encoder(2,1,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
+	wheelEncoder = new Encoder(1,2,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
 
 	pot = new AnalogChannel(1,3);
 
@@ -28,7 +28,6 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	printf("entering %s main\n", taskName);
 	
 	bool prevTrigState, prevAState, prevBState, prevYState;
-	bool isSixty;
 	double power, integral, goal;
 	
 	PIDSpecific = 0.0;
@@ -44,7 +43,8 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			prevAState = true;
 			prevBState = true;
 			prevYState = true;
-			isSixty = false;
+			
+			goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
 			
 			fortyFive->Set(true);
 			sixty->Set(false);	
@@ -54,8 +54,8 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			PIDSpecific = 0.0;
 			
 			wheelEncoder->Stop();
-			wheelEncoder->Reset();
-			wheelEncoder->Start();			
+			wheelEncoder->Reset();		
+			wheelEncoder->Start();
 		}
 		
 		//////////////////////////////////////
@@ -65,7 +65,6 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			fortyFive->Set(true);
 			sixty->Set(false);	
 			double current = wheelEncoder->GetRate();
-			printf("Encoder: %g\n",current);
 			double error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
 			
 			integral+=error;
@@ -86,9 +85,8 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////
 		// State: Teleop
 		//////////////////////////////////////				
-		if (taskStatus == STATUS_TELEOP) {			
-			
-			if(global->SecondaryGetRightTrigger() && !prevTrigState){
+		if (taskStatus == STATUS_TELEOP) {						
+			if(global->SecondaryGetRightTrigger()){
 				fortyFive->Set(true);
 				sixty->Set(false);	
 				goal = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED");
@@ -100,8 +98,9 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			
 			// PID LOOP OF AWESOMENESS //			
 			double current = wheelEncoder->GetRate();
-//			printf("Encoder: %g\n",current);
+//			printf("Current: %g, Goal: %g\n",current, goal);
 			double error = goal - current;
+			value = error;
 			
 			integral+=error;
 				

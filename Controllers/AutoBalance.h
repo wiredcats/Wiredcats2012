@@ -8,7 +8,7 @@
 #include "../Task2415.h"
 #include "../Global.h"
 
-#define WAIT_FOR_INPUT (30)
+#define WAIT_FOR_INPUT (10)
 
 class AutoBalance2415 : public Task2415 {
 private:

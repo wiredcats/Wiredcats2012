@@ -19,6 +19,8 @@ void _GLOBAL__I__ZN15AutoTracker2415C2Ev();
 
 void _GLOBAL__I__ZN16TaskTemplate2415C2Ev();
 
+void _GLOBAL__I__ZN19ShootController2415C2Ev();
+
 void _GLOBAL__I__ZN6GlobalC2Ev();
 
 void _GLOBAL__I__ZN8Task2415C2Ev();
@@ -56,6 +58,7 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN15AutoBalance2415C2Ev,
     _GLOBAL__I__ZN15AutoTracker2415C2Ev,
     _GLOBAL__I__ZN16TaskTemplate2415C2Ev,
+    _GLOBAL__I__ZN19ShootController2415C2Ev,
     _GLOBAL__I__ZN6GlobalC2Ev,
     _GLOBAL__I__ZN8Task2415C2Ev,
     _GLOBAL__I__ZN9CSVReaderC2ERKSs,
@@ -84,6 +87,8 @@ void _GLOBAL__D__ZN15AutoBalance2415C2Ev();
 void _GLOBAL__D__ZN15AutoTracker2415C2Ev();
 
 void _GLOBAL__D__ZN16TaskTemplate2415C2Ev();
+
+void _GLOBAL__D__ZN19ShootController2415C2Ev();
 
 void _GLOBAL__D__ZN6GlobalC2Ev();
 
@@ -118,6 +123,7 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN15AutoBalance2415C2Ev,
     _GLOBAL__D__ZN15AutoTracker2415C2Ev,
     _GLOBAL__D__ZN16TaskTemplate2415C2Ev,
+    _GLOBAL__D__ZN19ShootController2415C2Ev,
     _GLOBAL__D__ZN6GlobalC2Ev,
     _GLOBAL__D__ZN8Task2415C2Ev,
     _GLOBAL__D__ZN9CSVReaderC2ERKSs,

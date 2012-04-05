@@ -10,11 +10,14 @@ Drive2415::Drive2415() {
 	brakeNow = new Solenoid(7);
 	
 	stupidTimer = new Timer();
-
+	
 	//taskState = NORMAL_JOYSTICK;
 
 	Start("drive2415");
 }
+
+//vicLeft->Set(global->ReadCSV("AUTONOMOUS_DRIVE_SPEED"));
+//vicRight->Set(global->ReadCSV("AUTONOMOUS_DRIVE_SPEED"));
 
 int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
@@ -42,8 +45,28 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 		if(taskStatus == STATUS_AUTO) {
 			switch(taskState){
 			case FORWARD:
-				vicLeft->Set(global->ReadCSV("AUTONOMOUS_DRIVE_SPEED"));
-				vicRight->Set(global->ReadCSV("AUTONOMOUS_DRIVE_SPEED"));
+				vicLeft->Set(STRAIGHT_SPEED);
+				vicRight->Set(-STRAIGHT_SPEED);
+				break;
+			case BACK:
+				vicLeft->Set(-STRAIGHT_SPEED);
+				vicRight->Set(STRAIGHT_SPEED);
+				break;
+			case TURN_FORWARD_RIGHT:
+				vicLeft->Set(TURN_SPEED);
+				vicRight->Set(-TURN_SPEED - 0.15);
+				break;
+			case TURN_FORWARD_LEFT:
+				vicLeft->Set(TURN_SPEED + 0.15);
+				vicRight->Set(-TURN_SPEED);
+				break;
+			case TURN_BACKWARD_RIGHT:
+				vicLeft->Set(-STRAIGHT_SPEED);
+				vicRight->Set(STRAIGHT_SPEED + 0.15);
+				break;
+			case TURN_BACKWARD_LEFT:
+				vicLeft->Set(-STRAIGHT_SPEED - 0.15);
+				vicRight->Set(STRAIGHT_SPEED);
 				break;
 			default:
 				vicLeft->Set(0.0);
@@ -61,14 +84,13 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 				firstTime = false;
 			}
 			
-			double throttle = -global->PrimaryGetLeftY();
-			double wheel = global->PrimaryGetRightX();
+			double left = -global->PrimaryGetLeftY();
+			double right = global->PrimaryGetRightY();
 			
 			if(taskState == AUTOBALANCE) {
-				throttle *= global->ReadCSV("BALANCE_SLOW_DRIVE");
+				left *= global->ReadCSV("BALANCE_SLOW_DRIVE");
+				right *= global->ReadCSV("BALANCE_SLOW_DRIVE");
 			}
-						
-			bool isQuickTurn = global->PrimaryGetLeftBumper(); 
 			
 			//Toggle the brakes
 			if(global->PrimaryGetLeftTrigger() && !prevTrigState && stupidTimer->Get() >= 90) {
@@ -84,53 +106,10 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 				}
 			}
 			prevTrigState = global->PrimaryGetLeftTrigger();
-						
-			float linear_power = throttle;
 			
-			double wheelNonLinearity;
-			
-			wheelNonLinearity = global->ReadCSV("TURN_NONLIN");
-			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);	
-//			wheel = sin(PI / 2.0 * wheelNonLinearity * wheel) / sin(PI / 2.0 * wheelNonLinearity);
-			
-			double left_pwm, right_pwm, overPower;
-			float sensitivity = sensitivity = global->ReadCSV("SENSE_LOW");
-			
-			if (fabs(throttle) > global->ReadCSV("SENSE_CUTTOFF")) {
-				sensitivity = 1 - (1 - sensitivity) / fabs(throttle);
-			}
-			
-			float angular_power;
-				
-			//quickturn!
-			if (isQuickTurn) {
-				overPower = 1.0;
-				sensitivity = 1.0;
-				angular_power = wheel;
-			} else {
-				overPower = 0.0;
-				angular_power = throttle * wheel * sensitivity; 
-			}
-			
-			left_pwm = linear_power + angular_power;
-			right_pwm = linear_power - angular_power;
-			
-			if (left_pwm > 1.0) {
-				right_pwm -= overPower*(left_pwm - 1.0);
-				left_pwm = 1.0;
-				} else if (right_pwm > 1.0) {
-					left_pwm -= overPower*(right_pwm - 1.0);
-					right_pwm = 1.0;
-					} else if (left_pwm < -1.0) {
-						right_pwm += overPower*(-1.0 - left_pwm);
-						left_pwm = -1.0;
-						} else if (right_pwm < -1.0) {
-							left_pwm += overPower*(-1.0 - right_pwm);
-							right_pwm = -1.0;
-						}
 			if(!isBraked){
-				vicLeft->Set(global->LinearizeVictor(left_pwm));
-				vicRight->Set(global->LinearizeVictor(-right_pwm));
+				vicLeft->Set(global->LinearizeVictor(left));
+				vicRight->Set(global->LinearizeVictor(right));
 			}
 		}
 		SwapAndWait();

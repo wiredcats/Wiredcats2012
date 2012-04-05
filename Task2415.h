@@ -26,6 +26,7 @@ protected:
 	bool taskStateComplete;
 	
 	double PIDSpecific;
+	double value;
 
 public:
 	Task2415(void);
@@ -42,6 +43,7 @@ public:
 	void SetState(int state);
 	int GetState(void);
 	void SetPWMSpecific(double pwm);
+	double GetValue(void);
 	
 	bool StateComplete();
 

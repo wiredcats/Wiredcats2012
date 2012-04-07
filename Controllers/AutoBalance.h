@@ -15,6 +15,8 @@ private:
 	Global *global;
 
 	Task2415 *drive;
+	
+	Solenoid *stickDown, *stickUp;
 
 public:
 	AutoBalance2415(void);

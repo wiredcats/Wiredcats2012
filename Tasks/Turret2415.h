@@ -9,11 +9,6 @@
 #define FENDER_SHOOT (10)
 #define KEY_SHOOT (15)
 
-//TODO: Put this into the text document
-//We will end up having 2 CSV for each robot
-const double LEFT_LIMIT = 1.88;
-const double RIGHT_LIMIT = 4.79;
-
 class Turret2415 : public Task2415 {
 private:
 	Global *global;
@@ -22,10 +17,7 @@ private:
 	
 	Solenoid *fortyFive, *sixty;
 	
-	Encoder *wheelEncoder;
-	
-	AnalogChannel *pot;
-	
+	Encoder *wheelEncoder;	
 public:
 	Turret2415();
 	

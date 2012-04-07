@@ -10,16 +10,13 @@
 #define WAIT_FOR_INPUT (10)
 #define SHOOT (30)
 
-const float CLICKS_INDEX = 150;
-
 class Intake2415 : public Task2415 {
 private:
 	Global *global;
-	Solenoid *armUp, *armDown;
-	Relay *towerSuction, *feed;
+	Solenoid *armUp, *armDown, *bridgeUp, *bridgeDown;
+	Relay *tower;
+	Victor *feed;
 	Timer *waitTimer;
-	DigitalInput *ballSensor;
-	Encoder *towerEncoder;
 
 public:
 	Intake2415(void);

@@ -8,10 +8,8 @@ AutoTracker2415::AutoTracker2415() {
 	printf("stalling to allow tasks to be initialized\n");
 	Wait(2.0);
 	turret = Task2415::SearchForTask("turret2415");
-	intake = Task2415::SearchForTask("intake2415");
 	
-	led = new Relay(4);
-	turretEncoder = new Encoder(7,8,false,(CounterBase::EncodingType)0); 
+	turretEncoder = new Encoder(8,9,false,(CounterBase::EncodingType)0); 
 
 	Start("autotracker2415");
 }
@@ -104,7 +102,6 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					int targetHeight;
 					targetHeight = 0;
 					
-					//TODO: Not sure this is right application of PID
 				    integral = 0.0;
 					
 					printf("Particles Found!: %d\n", s_particles->size());										
@@ -118,7 +115,8 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 							printf("Best:(%d,%d)    SideRatio:%g    Area:%g    AreaRatio:%g   Height:%d\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest), ratioBest.particleArea, AreaRatio(ratioBest), targetHeight);
 							current = turretEncoder->Get();
 							//6.783 pixels / degree 
-							//2.553 clicks / degree
+							//2.553 clicks / degree 
+							// TODO: Tune these constants more accurately
 							// 2.553 / 6.783 = 0.3714
 							goal = (int) (current + 0.3717 *(ratioBest.imageWidth / 2 - ratioBest.center_mass_x));
 							prev = current;
@@ -149,7 +147,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					if(error != 0) {				
 						// Compute the power to send to the arm.
 						double power = kp * error + ki * integral + kd * deriv;
-						printf("Current: %d, Error: %d, Power:%g\n",current, error,power);						
+						printf("Error: %d, Power:%g\n",error,power);						
 						turret->SetPWMSpecific(power);																	
 						prev = current;
 						taskState = LOCK_AND_FOLLOW;

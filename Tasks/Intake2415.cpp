@@ -3,22 +3,22 @@
 Intake2415::Intake2415() {
 	global = new Global();
 	
-	armUp = new Solenoid(3);
-	armDown = new Solenoid(4);
+	armUp = new Solenoid(3,5);
+	armDown = new Solenoid(3,6);
 	
-	towerSuction = new Relay(2);
-	feed = new Relay(3);
+	bridgeUp = new Solenoid(3,4);
+	bridgeDown = new Solenoid(3,3);
 	
-	ballSensor = new DigitalInput(9);
-	towerEncoder = new Encoder(12,13,false,(CounterBase::EncodingType)2);
-	
+	feed = new Victor(5);
+	tower = new Relay(2);
+		
 	Start("intake2415");
 }
 
 int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main", taskName);
 	
-	bool prevOtherXState, prevTrigState, prevBumpState;
+	bool prevOtherXState, prevTrigState;
 	
 	while (keepTaskAlive) {
 		//////////////////////////////////////
@@ -28,10 +28,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			global->ResetCSV();
 						
 			prevTrigState = false;
-			prevBumpState = false;
 			prevOtherXState = false;
-			towerEncoder->Stop();
-			towerEncoder->Reset();
 		}
 		
 		//////////////////////////////////////
@@ -40,10 +37,12 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		if(taskStatus == STATUS_AUTO){
 			switch(taskState) {
 			case WAIT_FOR_AUTO_INPUT:
-				towerSuction->Set(towerSuction->kOff);
+//				printf("Waiting...\n");
+				tower->Set(tower->kOff);
 				break;
 			case SHOOT:			
-				towerSuction->Set(towerSuction->kReverse);
+//				printf("We are shooting\n");
+				tower->Set(tower->kReverse);
 				break;
 			default:
 				break;
@@ -53,52 +52,48 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////
 		// State: Teleop
 		//////////////////////////////////////		
-		if (taskStatus == STATUS_TELEOP) {	
-			// Arm control //
+		if (taskStatus == STATUS_TELEOP) {				
+			if(taskState == SHOOT){
+				tower->Set(tower->kReverse);
+			}
+			
+			if(taskState == WAIT_FOR_INPUT){
+				tower->Set(tower->kOff);
+			}
+			
+			// Arm control //						
 			if(global->PrimaryGetLeftTrigger()) {
 				armUp->Set(false);
 				armDown->Set(true);
 			} else {
 				armUp->Set(true);
 				armDown->Set(false);
-			}	
+			}
 			
 			if(global->PrimaryGetLeftBumper()){
-				feed->Set(feed->kReverse);
+				armUp->Set(false);
+				armDown->Set(true);
+				bridgeUp->Set(false);
+				bridgeDown->Set(true);
 			} else {
-				feed->Set(feed->kOff);
+				bridgeDown->Set(false);
+				bridgeUp->Set(true);
 			}
-			
-//			printf("Tower Encoder: %d\n",towerEncoder->Get());			
-			
-			//Autoindexing:
-			//Once light sensor triggered, run tower for set amount of encoder clicks
-			//1 if it has nothing, 0 if it has a ball
-			if(!ballSensor->Get()){
-				towerEncoder->Start();
-				towerSuction->Set(towerSuction->kReverse);				
+						
+			if(global->SecondaryGetButtonB()){
+				feed->Set(-1.0);
 			} else {
-				towerSuction->Set(towerSuction->kOff);
+				feed->Set(0.0);
 			}
-			
-			if(towerEncoder->Get() >= CLICKS_INDEX) {
-				towerEncoder->Stop();
-				towerEncoder->Reset();
-				towerSuction->Set(towerSuction->kOff);
-			}
-			
-			if(taskState == SHOOT){
-				towerSuction->Set(towerSuction->kReverse);
-			}
-			
+						
 			// Backdrive the tower //
 			if(global->SecondaryGetButtonY()) {
-				towerSuction->Set(towerSuction->kForward); 
+				tower->Set(tower->kForward); 
+				feed->Set(1.0);
 			} 
 			
 			prevOtherXState = global->SecondaryGetButtonX();
 			prevTrigState = global->SecondaryGetLeftTrigger();
-			prevBumpState = global->SecondaryGetLeftBumper();
 		}
 		SwapAndWait();
 	}

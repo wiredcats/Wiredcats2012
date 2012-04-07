@@ -18,9 +18,8 @@ class AutoTracker2415 : public Task2415 {
 private:
 	Global *global;	
 
-	Task2415 *turret, *intake;
+	Task2415 *turret;
 	
-	Relay* led;
 	Encoder* turretEncoder;
 	
 public:

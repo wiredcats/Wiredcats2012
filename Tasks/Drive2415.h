@@ -7,7 +7,6 @@
 #include <math.h>
 
 #define NORMAL_JOYSTICK (10)
-#define AUTOBALANCE (20)
 
 #define FORWARD (7)
 #define BACK (17)
@@ -15,9 +14,6 @@
 #define TURN_FORWARD_LEFT (37)
 #define TURN_BACKWARD_RIGHT (47)
 #define TURN_BACKWARD_LEFT (57)
-
-const float STRAIGHT_SPEED = 0.3;
-const float TURN_SPEED = 0.2;
 
 const float PI = 3.1415926;
 
@@ -35,6 +31,7 @@ public:
 	Drive2415(void);
 	
 	virtual int Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10);
+	int Sign(float val);
 };
 
 #endif

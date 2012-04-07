@@ -6,8 +6,8 @@ Drive2415::Drive2415() {
 	vicLeft = new Victor(1);
 	vicRight = new Victor(2);
 	
-	brakeOff = new Solenoid(8);
-	brakeNow = new Solenoid(7);
+	brakeOff = new Solenoid(3,8);
+	brakeNow = new Solenoid(3,7);
 	
 	stupidTimer = new Timer();
 	
@@ -22,7 +22,7 @@ Drive2415::Drive2415() {
 int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
-	bool isBraked, prevTrigState;
+	bool isBraked, prevBState;
 	bool firstTime = true;
 	
 	while (keepTaskAlive) { 		
@@ -33,7 +33,7 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			global->ResetCSV();
 			
 			isBraked = false;
-			prevTrigState = false;			
+			prevBState = false;			
 			stupidTimer->Stop();
 			stupidTimer->Reset();
 			firstTime = true;
@@ -45,28 +45,28 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 		if(taskStatus == STATUS_AUTO) {
 			switch(taskState){
 			case FORWARD:
-				vicLeft->Set(STRAIGHT_SPEED);
-				vicRight->Set(-STRAIGHT_SPEED);
+				vicLeft->Set(global->ReadCSV("STRAIGHT_SPEED"));
+				vicRight->Set(-global->ReadCSV("STRAIGHT_SPEED"));
 				break;
 			case BACK:
-				vicLeft->Set(-STRAIGHT_SPEED);
-				vicRight->Set(STRAIGHT_SPEED);
+				vicLeft->Set(-global->ReadCSV("STRAIGHT_SPEED"));
+				vicRight->Set(global->ReadCSV("STRAIGHT_SPEED"));
 				break;
 			case TURN_FORWARD_RIGHT:
-				vicLeft->Set(TURN_SPEED);
-				vicRight->Set(-TURN_SPEED - 0.15);
+				vicLeft->Set(global->ReadCSV("TURN_SPEED"));
+				vicRight->Set(-global->ReadCSV("TURN_SPEED") - 0.15);
 				break;
 			case TURN_FORWARD_LEFT:
-				vicLeft->Set(TURN_SPEED + 0.15);
-				vicRight->Set(-TURN_SPEED);
+				vicLeft->Set(global->ReadCSV("TURN_SPEED") + 0.15);
+				vicRight->Set(-global->ReadCSV("TURN_SPEED"));
 				break;
 			case TURN_BACKWARD_RIGHT:
-				vicLeft->Set(-STRAIGHT_SPEED);
-				vicRight->Set(STRAIGHT_SPEED + 0.15);
+				vicLeft->Set(-global->ReadCSV("STRAIGHT_SPEED"));
+				vicRight->Set(global->ReadCSV("STRAIGHT_SPEED") + 0.15);
 				break;
 			case TURN_BACKWARD_LEFT:
-				vicLeft->Set(-STRAIGHT_SPEED - 0.15);
-				vicRight->Set(STRAIGHT_SPEED);
+				vicLeft->Set(-global->ReadCSV("STRAIGHT_SPEED") - 0.15);
+				vicRight->Set(global->ReadCSV("STRAIGHT_SPEED"));
 				break;
 			default:
 				vicLeft->Set(0.0);
@@ -87,29 +87,42 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			double left = -global->PrimaryGetLeftY();
 			double right = global->PrimaryGetRightY();
 			
-			if(taskState == AUTOBALANCE) {
+			if(global->PrimaryGetRightBumper()) {
 				left *= global->ReadCSV("BALANCE_SLOW_DRIVE");
 				right *= global->ReadCSV("BALANCE_SLOW_DRIVE");
 			}
 			
+			//Cheesy poofs stinks so we're writing our own "add a constant" deadband
+			left *= 0.885;
+			right *= 0.92;
+			
+			left += 0.115 * Sign(left);
+			right += 0.08 * Sign(right);
+			
 			//Toggle the brakes
-			if(global->PrimaryGetLeftTrigger() && !prevTrigState && stupidTimer->Get() >= 90) {
+			if(global->PrimaryGetButtonB() && !prevBState && stupidTimer->Get() >= 90) {
 				stupidTimer->Stop();
 				if(isBraked) {
 					isBraked = false;
-					brakeOff->Set(true);
-					brakeNow->Set(false);
 				} else {
 					isBraked = true;
-					brakeOff->Set(false);
-					brakeNow->Set(true);
 				}
 			}
-			prevTrigState = global->PrimaryGetLeftTrigger();
+			prevBState = global->PrimaryGetButtonB();
+			
+			if(isBraked){
+				brakeOff->Set(false);
+				brakeNow->Set(true);
+			} else {
+				brakeOff->Set(true);
+				brakeNow->Set(false);
+			}
 			
 			if(!isBraked){
-				vicLeft->Set(global->LinearizeVictor(left));
-				vicRight->Set(global->LinearizeVictor(right));
+//				vicLeft->Set(global->LinearizeVictor(left));
+//				vicRight->Set(global->LinearizeVictor(right));
+				vicLeft->Set(left);
+				vicRight->Set(right);
 			}
 		}
 		SwapAndWait();
@@ -117,4 +130,15 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 
 	return 0;
 }
+
+int Drive2415::Sign(float val){
+	if(val >= 0) {
+		return 1;
+	}
+	if(val < 0) {
+		return -1;
+	}
+	return(1);
+}
+
 

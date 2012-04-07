@@ -12,14 +12,12 @@ Turret2415::Turret2415() {
 	vicWheel = new Victor(3);
 	vicRotate = new Victor(4);
 	
-	fortyFive = new Solenoid(1);
-	sixty = new Solenoid(2);
+	fortyFive = new Solenoid(3,1);
+	sixty = new Solenoid(3,2);
 	
 	//For practice bot, (1,2...)
 	//For real bot, (2,1...)
-	wheelEncoder = new Encoder(1,2,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
-
-	pot = new AnalogChannel(1,3);
+	wheelEncoder = new Encoder(2,1,false,(CounterBase::EncodingType)0); //0 maps to k1X. Shouldn't have to do this either...
 
 	Start("turret2415");
 }

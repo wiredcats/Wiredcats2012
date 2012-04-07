@@ -11,13 +11,13 @@
 
 #define WAIT_FOR_INPUT (10)
 
-const float ERROR_MARGIN = 250;
-
 class ShootController2415 : public Task2415 {
 private:
 	Global *global;
 
 	Task2415 *turret, *intake;
+	DigitalInput *ballSensor;
+	Encoder *towerEncoder;
 
 public:
 	ShootController2415(void);

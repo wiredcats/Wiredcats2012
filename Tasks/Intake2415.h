@@ -6,6 +6,7 @@
 #include "../Global.h"
 
 #define WAIT_FOR_AUTO_INPUT (17)
+#define SECOND_SHOOT (27)
 
 #define WAIT_FOR_INPUT (10)
 #define SHOOT (30)

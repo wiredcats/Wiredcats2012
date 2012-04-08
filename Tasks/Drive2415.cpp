@@ -6,8 +6,8 @@ Drive2415::Drive2415() {
 	vicLeft = new Victor(1);
 	vicRight = new Victor(2);
 	
-	brakeOff = new Solenoid(3,8);
-	brakeNow = new Solenoid(3,7);
+	brakeOff = new Solenoid(1,8);
+	brakeNow = new Solenoid(1,7);
 	
 	stupidTimer = new Timer();
 	
@@ -92,12 +92,21 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 				right *= global->ReadCSV("BALANCE_SLOW_DRIVE");
 			}
 			
-			//Cheesy poofs stinks so we're writing our own "add a constant" deadband
-			left *= 0.885;
-			right *= 0.92;
+			//Using the family of equaztions in Ether's whitepaper
+			double a = global->ReadCSV("DRIVE_GAIN");
+			double b = global->ReadCSV("DRIVE_DEADBAND");
 			
-			left += 0.115 * Sign(left);
-			right += 0.08 * Sign(right);
+			if(left >= 0){
+				left = b + (1-b)*(a*pow(left,3) + (1-a)*left);
+			} else {
+				left = -b + (1-b)*(a*pow(left,3) + (1-a)*left);
+			}
+			
+			if(right >= 0){
+				right = b + (1-b)*(a*pow(right,3) + (1-a)*right);
+			} else {
+				right = -b + (1-b)*(a*pow(right,3) + (1-a)*right);
+			}
 			
 			//Toggle the brakes
 			if(global->PrimaryGetButtonB() && !prevBState && stupidTimer->Get() >= 90) {

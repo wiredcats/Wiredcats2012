@@ -6,8 +6,9 @@
 #include "../Global.h"
 #include <math.h>
 
-#define FENDER_SHOOT (10)
-#define KEY_SHOOT (15)
+#define AUTO_FIRST_BALLS (7)
+#define AUTO_REST_BALLS (17)
+#define AUTO_FINAL_BALLS (27)
 
 class Turret2415 : public Task2415 {
 private:

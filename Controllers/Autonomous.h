@@ -6,19 +6,22 @@
 #include "../Global.h"
 
 #include "../Tasks/Intake2415.h"
+#include "../Tasks/Turret2415.h"
 
 #define START (10)
 #define WAIT (20)
 #define SHOOT (30)
+#define NEW_TURRET (40)
+#define LAST_TURRET (50)
 #define END (9000)
 
 class Autonomous2415 : public Task2415 {
 private:
 	Global *global;
 	
-	Task2415 *intake;
+	Task2415 *intake, *turret;
 	
-	Timer *waitTimer;
+	Timer *waitTimer, *totalTimer;
 
 public:
 	Autonomous2415(void);

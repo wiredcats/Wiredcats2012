@@ -3,11 +3,11 @@
 Intake2415::Intake2415() {
 	global = new Global();
 	
-	armUp = new Solenoid(3,5);
-	armDown = new Solenoid(3,6);
+	armUp = new Solenoid(1,5);
+	armDown = new Solenoid(1,6);
 	
-	bridgeUp = new Solenoid(3,4);
-	bridgeDown = new Solenoid(3,3);
+	bridgeUp = new Solenoid(1,4);
+	bridgeDown = new Solenoid(1,3);
 	
 	feed = new Victor(5);
 	tower = new Relay(2);
@@ -43,6 +43,11 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			case SHOOT:			
 //				printf("We are shooting\n");
 				tower->Set(tower->kReverse);
+				break;
+			case SECOND_SHOOT:
+				armUp->Set(false);
+				armDown->Set(true);
+				feed->Set(-1.0);
 				break;
 			default:
 				break;

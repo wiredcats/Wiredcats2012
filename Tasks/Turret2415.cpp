@@ -12,8 +12,8 @@ Turret2415::Turret2415() {
 	vicWheel = new Victor(3);
 	vicRotate = new Victor(4);
 	
-	fortyFive = new Solenoid(3,1);
-	sixty = new Solenoid(3,2);
+	fortyFive = new Solenoid(1,1);
+	sixty = new Solenoid(1,2);
 	
 	//For practice bot, (1,2...)
 	//For real bot, (2,1...)
@@ -63,7 +63,16 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			fortyFive->Set(true);
 			sixty->Set(false);	
 			double current = wheelEncoder->GetRate();
-			double error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
+			double error;
+			if(taskState == AUTO_FIRST_BALLS){
+				error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
+			} 
+			if(taskState == AUTO_REST_BALLS){
+				error = global->ReadCSV("SECONDARY_AUTO_SPEED") - current;
+			}
+			if(taskState == AUTO_FINAL_BALLS){
+				error = global->ReadCSV("TERTIARY_AUTO_SPEED") - current;
+			}
 			
 			integral+=error;
 				

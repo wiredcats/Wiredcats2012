@@ -8,8 +8,8 @@ AutoBalance2415::AutoBalance2415(void) {
 
 	drive = Task2415::SearchForTask("drive2415");
 	
-	stickDown = new Solenoid(4,7);
-	stickUp = new Solenoid(4,8);
+	stickDown = new Solenoid(2,8);
+	stickUp = new Solenoid(2,7);
 	
 	taskState = WAIT_FOR_INPUT;
 
@@ -22,18 +22,17 @@ int AutoBalance2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 	while (keepTaskAlive) {
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
-			stickDown->Set(true);
-			stickUp->Set(false);
+			stickDown->Set(false);
+			stickUp->Set(true);
 		}
 		
 		if (taskStatus == STATUS_TELEOP) {
-			if(global->PrimaryGetButtonStart()){
-				stickDown->Set(false);
-				stickUp->Set(true);
-			}
 			if(global->PrimaryGetButtonBack()){
 				stickDown->Set(true);
 				stickUp->Set(false);
+			} else {
+				stickDown->Set(false);
+				stickUp->Set(true);
 			}
 		}
 		SwapAndWait();

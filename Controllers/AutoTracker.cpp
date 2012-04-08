@@ -89,7 +89,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 				case MANUAL_CONTROL:
 					current = turretEncoder->Get();
 //					printf("Current Manual: %d\n ", current);
-					turret->SetPWMSpecific(-global->SecondaryGetLeftX() * 0.2);
+					turret->SetPWMSpecific(-global->SecondaryGetLeftX() * 0.175);
 					if(global->SecondaryGetDPadX() < 0) { //Move Left
 						turret->SetPWMSpecific(global->ReadCSV("TURRET_SPEED"));
 					}

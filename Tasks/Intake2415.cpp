@@ -6,8 +6,8 @@ Intake2415::Intake2415() {
 	armUp = new Solenoid(1,5);
 	armDown = new Solenoid(1,6);
 	
-	bridgeUp = new Solenoid(1,4);
-	bridgeDown = new Solenoid(1,3);
+	bridgeUp = new Solenoid(1,3);
+	bridgeDown = new Solenoid(1,4);
 	
 	feed = new Victor(5);
 	tower = new Relay(2);
@@ -18,7 +18,8 @@ Intake2415::Intake2415() {
 int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main", taskName);
 	
-	bool prevOtherXState, prevTrigState;
+	bool prevOtherXState;
+	bool isBridgeUp, isArmUp;
 	
 	while (keepTaskAlive) {
 		//////////////////////////////////////
@@ -26,8 +27,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 		//////////////////////////////////////		
 		if(taskStatus == STATUS_DISABLED) {
 			global->ResetCSV();
-						
-			prevTrigState = false;
+			tower->Set(tower->kOff);			
 			prevOtherXState = false;
 		}
 		
@@ -68,21 +68,33 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			
 			// Arm control //						
 			if(global->PrimaryGetLeftTrigger()) {
-				armUp->Set(false);
-				armDown->Set(true);
+				isArmUp = false;
+				isBridgeUp = true;
 			} else {
-				armUp->Set(true);
-				armDown->Set(false);
+				isArmUp = true;
 			}
 			
 			if(global->PrimaryGetLeftBumper()){
+				isBridgeUp = false;
+				isArmUp = true;
+			} else {
+				isBridgeUp = true;
+			}
+			
+			if(isArmUp){
+				armUp->Set(true);
+				armDown->Set(false);
+			} else {
 				armUp->Set(false);
 				armDown->Set(true);
+			}
+			
+			if(isBridgeUp){
+				bridgeUp->Set(true);
+				bridgeDown->Set(false);
+			} else {
 				bridgeUp->Set(false);
 				bridgeDown->Set(true);
-			} else {
-				bridgeDown->Set(false);
-				bridgeUp->Set(true);
 			}
 						
 			if(global->SecondaryGetButtonB()){
@@ -98,7 +110,6 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			} 
 			
 			prevOtherXState = global->SecondaryGetButtonX();
-			prevTrigState = global->SecondaryGetLeftTrigger();
 		}
 		SwapAndWait();
 	}

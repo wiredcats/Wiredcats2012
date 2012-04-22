@@ -121,7 +121,7 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 							goal = (int) (current + 0.3717 *(ratioBest.imageWidth / 2 - ratioBest.center_mass_x));
 							prev = current;
 							printf("Current Found: %d         Goal: %d\n ", current, goal);
-							taskState = LOCK_AND_FOLLOW;
+//							taskState = LOCK_AND_FOLLOW;
 						} else { //TODO: Find another method that isn't so concerned about ratio. Consistnently one target and stay lcoked on Write PID Loop that centers the loop on closest one? Or pick one where center of mass differ most from BB center of mass (most skew)? Closest in area???
 							printf("Closest:(%d,%d)    SideRatio:%g    AreaRatio:%g\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest),AreaRatio(ratioBest));
 						}

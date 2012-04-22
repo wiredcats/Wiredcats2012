@@ -25,7 +25,7 @@ ShootController2415::ShootController2415(void) {
 int ShootController2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
-	bool inLoop;
+	bool inIndexLoop;
 	
 	while (keepTaskAlive) {
 		if(taskStatus == STATUS_DISABLED) {
@@ -33,14 +33,16 @@ int ShootController2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, in
 
 			towerEncoder->Stop();
 			towerEncoder->Reset();
-			inLoop = false;
+			
+			inIndexLoop = false;
 		}
-		
+				
 		if (taskStatus == STATUS_TELEOP) {
-			if(!inLoop){
+			if(!inIndexLoop){
 				if(global->SecondaryGetRightBumper()){
 	//				printf("GetValue: %g\n",turret->GetValue());
-					if(fabs(turret->GetValue()) <= global->ReadCSV("FLYWHEEL_ERROR_MARGIN")){
+					if(turret->GetValue() >= global->ReadCSV("FLYWHEEL_LOWER_ERROR_MARGIN") 
+					&& turret->GetValue() <= global->ReadCSV("FLYWHEEL_UPPER_ERROR_MARGIN")){
 						intake->SetState(SHOOT);					
 					} else {
 						intake->SetState(WAIT_FOR_INPUT);
@@ -56,17 +58,24 @@ int ShootController2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, in
 			
 //			printf("Tower: %d\n",towerEncoder->Get());
 			
-			if(!ballSensor->Get() && !inLoop){
+			if(!ballSensor->Get() && !inIndexLoop){
+				inIndexLoop = true;
 				towerEncoder->Start();
-				intake->SetState(SHOOT);
-				inLoop = true;
-			}					
+				intake->SetState(SHOOT);			
+			}
+			
 			if(towerEncoder->Get() >= global->ReadCSV("CLICKS_INDEX")) {
 				towerEncoder->Stop();
 				towerEncoder->Reset();
 				intake->SetState(WAIT_FOR_INPUT);
-				inLoop = false;
+				inIndexLoop = false;
 			}
+			
+			//If we're backdriving, then don't autoindex afterwards
+			if(global->SecondaryGetButtonY()) {
+				inIndexLoop = false;
+			}
+			
 		}
 		SwapAndWait();
 	}

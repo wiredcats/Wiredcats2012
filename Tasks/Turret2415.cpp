@@ -25,7 +25,7 @@ Turret2415::Turret2415() {
 int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
-	bool prevTrigState, prevAState, prevBState, prevYState;
+	bool prevTrigState;
 	double power, integral, goal;
 	
 	PIDSpecific = 0.0;
@@ -38,9 +38,6 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			global->ResetCSV();
 			
 			prevTrigState = true;
-			prevAState = true;
-			prevBState = true;
-			prevYState = true;
 			
 			goal = global->ReadCSV("FENDER_SHOOTER_ENCODER_SPEED");
 			
@@ -126,9 +123,6 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			// Turret movement //			
 			vicRotate->Set(PIDSpecific);
 			
-			prevAState = global->SecondaryGetButtonA();
-			prevBState = global->SecondaryGetButtonB();
-			prevYState = global->SecondaryGetButtonY();
 			prevTrigState = global->SecondaryGetRightTrigger();
 		}
 		SwapAndWait();

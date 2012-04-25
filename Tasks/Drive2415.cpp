@@ -54,19 +54,19 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 				break;
 			case TURN_FORWARD_RIGHT:
 				vicLeft->Set(global->ReadCSV("TURN_SPEED"));
-				vicRight->Set(-global->ReadCSV("TURN_SPEED") - 0.15);
+				vicRight->Set(-global->ReadCSV("TURN_SPEED") - global->ReadCSV("TURN_GAIN"));
 				break;
 			case TURN_FORWARD_LEFT:
-				vicLeft->Set(global->ReadCSV("TURN_SPEED") + 0.15);
+				vicLeft->Set(global->ReadCSV("TURN_SPEED") + global->ReadCSV("TURN_GAIN"));
 				vicRight->Set(-global->ReadCSV("TURN_SPEED"));
 				break;
 			case TURN_BACKWARD_RIGHT:
-				vicLeft->Set(-global->ReadCSV("STRAIGHT_SPEED"));
-				vicRight->Set(global->ReadCSV("STRAIGHT_SPEED") + 0.15);
+				vicLeft->Set(-global->ReadCSV("TURN_SPEED"));
+				vicRight->Set(global->ReadCSV("TURN_SPEED") + global->ReadCSV("TURN_GAIN"));
 				break;
 			case TURN_BACKWARD_LEFT:
-				vicLeft->Set(-global->ReadCSV("STRAIGHT_SPEED") - 0.15);
-				vicRight->Set(global->ReadCSV("STRAIGHT_SPEED"));
+				vicLeft->Set(-global->ReadCSV("TURN_SPEED") - global->ReadCSV("TURN_GAIN"));
+				vicRight->Set(global->ReadCSV("TURN_SPEED"));
 				break;
 			default:
 				vicLeft->Set(0.0);

@@ -12,12 +12,12 @@ BridgeAutonomous2415::BridgeAutonomous2415(void) {
 	printf("stalling to allow tasks to be initialized\n");
 	Wait(1.0);
 
-	driveEncoder = new Encoder(10,11,false,(CounterBase::EncodingType)2);
+	driveEncoder = new Encoder(12,13,false,(CounterBase::EncodingType)2);
 	gyro = new Gyro(1);
 
 	taskState = START;
 
-	Start("auto2415");
+	Start("bridgeautonomous2415");
 }
 
 int BridgeAutonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
@@ -34,11 +34,16 @@ int BridgeAutonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, i
 			taskState = START;
 			}
 		
+		//TODO: Have 2 distinct phases
+		//When far from the bridge, TURN_SPEED = 0.2, TURN_GAIN = 0.15
+		//When close to the bridge (know by encoder value), TURN_SPEED = 0.0. TURN_GAIN = 0.5
+		
 		if (taskStatus == STATUS_AUTO) {
 			//Wait for a bit and then shoot with key shot
 			switch(taskState) {
 			case START:
 				waitTimer->Start();
+				turret->SetState(AUTO_FIRST_BALLS);
 				taskState = WAIT;
 				break;
 			case WAIT:
@@ -51,7 +56,7 @@ int BridgeAutonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, i
 				}
 				break;
 			case DRIVE_FORWARD:
-				printf("Encoder: %d, Gyro:%g \n",driveEncoder->Get(),gyro->GetAngle());
+//				printf("Encoder: %d, Gyro:%g \n",driveEncoder->Get(),gyro->GetAngle());
 				drive->SetState(FORWARD);
 				if(gyro->GetAngle() >= global->ReadCSV("MARGIN_OF_ANGLE")){
 					driveEncoder->Stop();
@@ -62,13 +67,13 @@ int BridgeAutonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, i
 				} else {
 					driveEncoder->Start();
 				}
-				if(driveEncoder->Get() <= -global->ReadCSV("COUNTS_DRIVE")) {
-					taskState = INTAKE_BALLS;
-					waitTimer->Start();
-					driveEncoder->Stop();
-					driveEncoder->Reset();
-					drive->SetState(NORMAL_JOYSTICK);
-				}
+//				if(driveEncoder->Get() <= -global->ReadCSV("COUNTS_DRIVE")) {
+//					taskState = INTAKE_BALLS;
+//					waitTimer->Start();
+//					driveEncoder->Stop();
+//					driveEncoder->Reset();
+//					drive->SetState(NORMAL_JOYSTICK);
+//				}
 				break;
 			case INTAKE_BALLS:
 				if(waitTimer->Get() >= global->ReadCSV("AUTONOMOUS_WAIT_TIME") ) {
@@ -79,7 +84,7 @@ int BridgeAutonomous2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, i
 				}
 				break;
 			case DRIVE_BACK:
-				printf("Encoder: %d, Gyro:%g \n",driveEncoder->Get(),gyro->GetAngle());
+//				printf("Encoder: %d, Gyro:%g \n",driveEncoder->Get(),gyro->GetAngle());
 				drive->SetState(BACK);
 				if(gyro->GetAngle() >= global->ReadCSV("MARGIN_OF_ANGLE")){
 					driveEncoder->Stop();

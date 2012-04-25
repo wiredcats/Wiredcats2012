@@ -7,7 +7,7 @@
 #include <math.h>
 
 #define AUTO_FIRST_BALLS (7)
-#define AUTO_REST_BALLS (17)
+#define AUTO_SECOND_BALLS (17)
 #define AUTO_FINAL_BALLS (27)
 
 class Turret2415 : public Task2415 {

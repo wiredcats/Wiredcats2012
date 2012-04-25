@@ -6,7 +6,7 @@
 #include "Controllers/AutoTracker.h"
 #include "Controllers/ShootController.h"
 
-//#include "Controllers/FeedAutonomous.h"
+#include "Controllers/FeedAutonomous.h"
 #include "Controllers/BridgeAutonomous.h"
 
 //Tasks
@@ -20,5 +20,5 @@ AutoTracker2415 autotracker;
 ShootController2415 shoot;
 
 //Autonomous
-//FeedAutonomous2415 autonomous;
-BridgeAutonomous2415 autonomous;
+FeedAutonomous2415 autonomous;
+//BridgeAutonomous2415 autonomous;

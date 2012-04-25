@@ -60,16 +60,23 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			fortyFive->Set(true);
 			sixty->Set(false);	
 			double current = wheelEncoder->GetRate();
-			double error;
-			if(taskState == AUTO_FIRST_BALLS){
-				error = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED") - current;
-			} 
-			if(taskState == AUTO_REST_BALLS){
-				error = global->ReadCSV("SECONDARY_AUTO_SPEED") - current;
+			double goal;
+			
+			switch(taskState){
+			case AUTO_FIRST_BALLS:
+				goal = global->ReadCSV("KEY_SHOOTER_ENCODER_SPEED");
+				break;
+			case AUTO_SECOND_BALLS:
+				goal = global->ReadCSV("SECONDARY_AUTO_SPEED");
+				break;
+			case AUTO_FINAL_BALLS:
+				goal = global->ReadCSV("TERTIARY_AUTO_SPEED");
+				break;
+			default:
+				break;
 			}
-			if(taskState == AUTO_FINAL_BALLS){
-				error = global->ReadCSV("TERTIARY_AUTO_SPEED") - current;
-			}
+			
+			double error = goal - current;
 			
 			integral+=error;
 				

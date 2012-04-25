@@ -27,7 +27,6 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
     Image* imaqImage;
     
     ParticleFilterOptions2 options[] = {true,false,false,true};
-    ParticleAnalysisReport ratioBest;
     vector<ParticleAnalysisReport>* s_particles;
     
     double integral = 0.0;
@@ -106,25 +105,21 @@ int AutoTracker2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 					
 					printf("Particles Found!: %d\n", s_particles->size());										
 					if(s_particles->size() > 0) {
-						//TODO: In order for us to track with more than one target,
-						//We will need to store an array of targets
 						FindRatioGood(s_particles);
-						ratioBest = FindRatioBest(s_particles);
-						if(fabs(SideRatio(ratioBest)- 4.0/3.0) <= global->ReadCSV("TARGET_MARGIN_OF_ERROR")) { //Ratio is not the only measurement, when tilted, can be as far off as 1
-							targetHeight = ratioBest.imageHeight - ratioBest.center_mass_y;
-							printf("Best:(%d,%d)    SideRatio:%g    Area:%g    AreaRatio:%g   Height:%d\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest), ratioBest.particleArea, AreaRatio(ratioBest), targetHeight);
-							current = turretEncoder->Get();
-							//6.783 pixels / degree 
-							//2.553 clicks / degree 
-							// TODO: Tune these constants more accurately
-							// 2.553 / 6.783 = 0.3714
-							goal = (int) (current + 0.3717 *(ratioBest.imageWidth / 2 - ratioBest.center_mass_x));
-							prev = current;
-							printf("Current Found: %d         Goal: %d\n ", current, goal);
-//							taskState = LOCK_AND_FOLLOW;
-						} else { //TODO: Find another method that isn't so concerned about ratio. Consistnently one target and stay lcoked on Write PID Loop that centers the loop on closest one? Or pick one where center of mass differ most from BB center of mass (most skew)? Closest in area???
-							printf("Closest:(%d,%d)    SideRatio:%g    AreaRatio:%g\n", ratioBest.center_mass_x, ratioBest.center_mass_y, SideRatio(ratioBest),AreaRatio(ratioBest));
-						}
+					}
+					if(s_particles->size() == 3) {
+						targetHeight = MidHeight(s_particles);
+						
+						//6.783 pixels / degree 
+						//2.553 clicks / degree 
+						// TODO: Tune these constants more accurately
+						// 2.553 / 6.783 = 0.3714
+						goal = (int) (current + global->ReadCSV("TURRET_BIAS") *(160 - AverageX(s_particles) - global->ReadCSV("TURRET_GAIN")));
+						printf("Best: Xcor = %d   TargetHeight = %d\n",AverageX(s_particles), targetHeight);
+						current = turretEncoder->Get();						
+						prev = current;
+						printf("Current Found: %d         Goal: %d\n ", current, goal);
+						taskState = LOCK_AND_FOLLOW;
 					}
 					break;
 				case LOCK_AND_FOLLOW:
@@ -186,6 +181,30 @@ void AutoTracker2415::FindRatioGood(vector<ParticleAnalysisReport>* vec){
 		size = vec->size();
 	}
 //	printf("\n\n");
+}
+
+int AutoTracker2415::MidHeight(vector<ParticleAnalysisReport>* vec){
+	int size = vec->size();	
+	int highest = 0, total = 0;
+	
+	for(int i = 0; i < size; i++){
+		total += vec->at(i).center_mass_y;
+		if(vec->at(i).center_mass_y < vec->at(highest).center_mass_y) {
+			highest = i;
+		}
+	}
+	total -= vec->at(highest).center_mass_y;
+	return(abs(vec->at(highest).center_mass_y - total / 2));
+}
+
+int AutoTracker2415::AverageX(vector<ParticleAnalysisReport>* vec){
+	int size = vec->size();
+	int total = 0;
+	
+	for(int i = 0; i < size; i++) {
+		total += vec->at(i).center_mass_x;
+	}
+	return(total / size);
 }
 
 ParticleAnalysisReport AutoTracker2415::FindRatioBest(vector<ParticleAnalysisReport>* vec){

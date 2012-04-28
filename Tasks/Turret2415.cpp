@@ -76,9 +76,10 @@ int Turret2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				break;
 			}
 			
-			double error = goal - current;
-			
+			double error = goal - current;		
 			integral+=error;
+
+			printf("Current: %g, Goal: %g\n",current, goal);			
 				
 			double kp = global->ReadCSV("KP_FLYWHEEL");
 			double ki = global->ReadCSV("KI_FLYWHEEL");

@@ -87,10 +87,10 @@ int Drive2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int 
 			double left = -global->PrimaryGetLeftY();
 			double right = global->PrimaryGetRightY();
 			
-			if(global->PrimaryGetRightBumper()) {
-				left *= global->ReadCSV("BALANCE_SLOW_DRIVE");
-				right *= global->ReadCSV("BALANCE_SLOW_DRIVE");
-			}
+//			if(global->PrimaryGetRightBumper()) {
+//				left *= global->ReadCSV("BALANCE_SLOW_DRIVE");
+//				right *= global->ReadCSV("BALANCE_SLOW_DRIVE");
+//			}
 			
 			//Using the family of equaztions in Ether's whitepaper
 			double a = global->ReadCSV("DRIVE_GAIN");

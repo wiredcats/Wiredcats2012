@@ -11,7 +11,7 @@ ShootController2415::ShootController2415(void) {
 	
 	//For practice, line sensor = 9
 	//For real, line sensor = 7
-	ballSensor = new DigitalInput(7);
+	ballSensor = new DigitalInput(5);
 	
 	//For practice, (12,13...
 	//For real, (10,11...
@@ -25,7 +25,7 @@ ShootController2415::ShootController2415(void) {
 int ShootController2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10) {
 	printf("entering %s main\n", taskName);
 	
-	bool inIndexLoop;
+	bool inIndexLoop = false;
 	
 	while (keepTaskAlive) {
 		if(taskStatus == STATUS_DISABLED) {
@@ -51,7 +51,7 @@ int ShootController2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, in
 					intake->SetState(WAIT_FOR_INPUT);
 				}
 			}
-						
+			
 			//Autoindexing:
 			//Once light sensor triggered, run tower for set amount of encoder clicks
 			//1 if it has nothing, 0 if it has a ball
@@ -64,16 +64,19 @@ int ShootController2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, in
 				intake->SetState(SHOOT);			
 			}
 			
-			if(towerEncoder->Get() >= global->ReadCSV("CLICKS_INDEX")) {
+			if(inIndexLoop && towerEncoder->Get() >= global->ReadCSV("CLICKS_INDEX")) {
 				towerEncoder->Stop();
 				towerEncoder->Reset();
 				intake->SetState(WAIT_FOR_INPUT);
 				inIndexLoop = false;
+			
 			}
 			
 			//If we're backdriving, then don't autoindex afterwards
 			if(global->SecondaryGetButtonY()) {
 				inIndexLoop = false;
+				towerEncoder->Stop();
+				towerEncoder->Reset();
 			}
 			
 		}

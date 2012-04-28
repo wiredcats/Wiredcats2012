@@ -1,16 +1,35 @@
 #include "Intake2415.h"
 
+//Up: A and D are on
+//
+//To do bridge: Switch Off A and D, turn on C. Turn on B for set amount of time and then turn off. Turn A back on
+//
+//Ball: A and C are on. D turns off. 
+//
+//A can not be on while B is on. C can not be on while D is on. Out of these pairs, one must always be on.
+//
+//Arm down is C
+//arm Up is D
+//Bridge up is A
+//Bridge down is B
+
+enum ARM_STATUS {
+	ALL_UP, BALL_GRAB, BRIDGE_PUSH
+};
+
 Intake2415::Intake2415() {
 	global = new Global();
 	
-	armUp = new Solenoid(1,5);
-	armDown = new Solenoid(1,6);
+	solD = new Solenoid(1,5);
+	solC = new Solenoid(1,6);
 	
-	bridgeUp = new Solenoid(1,3);
-	bridgeDown = new Solenoid(1,4);
+	solA = new Solenoid(1,4);
+	solB = new Solenoid(1,3);
 	
 	feed = new Victor(5);
-	tower = new Relay(2);
+	tower = new Relay(8);
+	
+	pulseTimer = new Timer();
 		
 	Start("intake2415");
 }
@@ -19,9 +38,11 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 	printf("entering %s main", taskName);
 	
 	bool prevOtherXState;
-	bool isBridgeUp, isArmUp;
+	bool hasPulsed;
+	ARM_STATUS armState = ALL_UP;
 	
 	while (keepTaskAlive) {
+		
 		//////////////////////////////////////
 		// State: Disabled
 		//////////////////////////////////////		
@@ -29,6 +50,9 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			global->ResetCSV();
 			tower->Set(tower->kOff);			
 			prevOtherXState = false;
+			armState = ALL_UP;
+			pulseTimer->Stop();
+			pulseTimer->Reset();
 		}
 		
 		//////////////////////////////////////
@@ -45,8 +69,7 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				tower->Set(tower->kReverse);
 				break;
 			case SECOND_SHOOT:
-				armUp->Set(false);
-				armDown->Set(true);
+				armState = BALL_GRAB;
 				feed->Set(-1.0);
 				break;
 			default:
@@ -66,37 +89,16 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				tower->Set(tower->kOff);
 			}
 			
-			// Arm control //						
-			if(global->PrimaryGetLeftTrigger()) {
-				isArmUp = false;
-				isBridgeUp = true;
-			} else {
-				isArmUp = true;
-			}
-			
+			//Arm Control
 			if(global->PrimaryGetLeftBumper()){
-				isBridgeUp = false;
-				isArmUp = true;
-			} else {
-				isBridgeUp = true;
+				armState = BALL_GRAB;
+			} else{
+				armState = ALL_UP;
+				if(global->PrimaryGetRightBumper()){
+					armState = BRIDGE_PUSH;
+				}
 			}
-			
-			if(isArmUp){
-				armUp->Set(true);
-				armDown->Set(false);
-			} else {
-				armUp->Set(false);
-				armDown->Set(true);
-			}
-			
-			if(isBridgeUp){
-				bridgeUp->Set(true);
-				bridgeDown->Set(false);
-			} else {
-				bridgeUp->Set(false);
-				bridgeDown->Set(true);
-			}
-						
+				
 			if(global->SecondaryGetButtonB()){
 				feed->Set(-1.0);
 			} else {
@@ -108,9 +110,48 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 				tower->Set(tower->kForward); 
 				feed->Set(1.0);
 			} 
-			
 			prevOtherXState = global->SecondaryGetButtonX();
 		}
+		
+		switch(armState){
+		case ALL_UP:
+			solA->Set(true);
+			solD->Set(true);
+			solB->Set(false);
+			solC->Set(false);
+			hasPulsed = false;
+			pulseTimer->Stop();
+			pulseTimer->Reset();
+			break;
+		case BRIDGE_PUSH:
+			solB->Set(true);
+			solC->Set(true);
+			solD->Set(false);
+			solA->Set(false);
+			hasPulsed = false;
+			pulseTimer->Stop();
+			pulseTimer->Reset();
+			break;
+		case BALL_GRAB:
+			if(!hasPulsed){
+				hasPulsed = true;
+				solA->Set(false);
+				solD->Set(false);
+				solC->Set(true);
+				pulseTimer->Start();
+				solB->Set(true);
+			}
+			if(hasPulsed && pulseTimer->Get() >= global->ReadCSV("PULSE_TIME")){
+				pulseTimer->Stop();
+				solB->Set(false);
+				solA->Set(true);				
+			}			
+			break;
+		default:
+			armState = ALL_UP;
+			break;
+		}
+		
 		SwapAndWait();
 	}
 

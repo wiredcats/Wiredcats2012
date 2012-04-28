@@ -14,10 +14,10 @@
 class Intake2415 : public Task2415 {
 private:
 	Global *global;
-	Solenoid *armUp, *armDown, *bridgeUp, *bridgeDown;
+	Solenoid *solA, *solB, *solC, *solD;
 	Relay *tower;
 	Victor *feed;
-	Timer *waitTimer;
+	Timer *pulseTimer;
 
 public:
 	Intake2415(void);

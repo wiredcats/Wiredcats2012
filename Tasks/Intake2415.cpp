@@ -67,6 +67,8 @@ int Intake2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8, int
 			case SHOOT:			
 //				printf("We are shooting\n");
 				tower->Set(tower->kReverse);
+				armState = BALL_GRAB;
+				feed->Set(-1.0);
 				break;
 			case SECOND_SHOOT:
 				armState = BALL_GRAB;

@@ -27,7 +27,7 @@ int AutoBalance2415::Main(int a2, int a3, int a4, int a5, int a6, int a7, int a8
 		}
 		
 		if (taskStatus == STATUS_TELEOP) {
-			if(global->PrimaryGetButtonBack()){
+			if(global->PrimaryGetRightTrigger()){
 				stickDown->Set(true);
 				stickUp->Set(false);
 			} else {
